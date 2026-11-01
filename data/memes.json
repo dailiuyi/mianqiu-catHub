@@ -1,0 +1,116 @@
+{
+  "version": "1.0.0",
+  "author": "쯔니 (zzni)",
+  "series_name": "몽실몽실 냥냥이 (棉球小猫)",
+  "total": 4,
+  "memes": [
+    {
+      "id": "kakao-01-01",
+      "title": "棉球小猫 第1弹 #01",
+      "title_ko": "몽실몽실 냥냥이 #01",
+      "series": "Kakao-Vol.1",
+      "author": "쯔니 (zzni)",
+      "is_animated": true,
+      "format": "webp",
+      "width": 360,
+      "height": 360,
+      "sha256": "1a79f09319d604d18bf6fd4891e0abb651779c4dc49083e12d691b14b03b8235",
+      "dhash": "1c163335060f2f20",
+      "tags": [
+        "可爱",
+        "猫咪"
+      ],
+      "ocr_text": "",
+      "pinyin": "mianqiuxiaomao di1dan #01 ",
+      "pinyin_first": "mqxm d1d #01 ",
+      "category": [
+        "Kakao-Vol.1",
+        "animated"
+      ],
+      "url": "images/raw/kakao-01-01.webp",
+      "thumb_url": "images/thumbs/kakao-01-01.webp",
+      "source_url": ""
+    },
+    {
+      "id": "kakao-01-02",
+      "title": "棉球小猫 第1弹 #02",
+      "title_ko": "몽실몽실 냥냥이 #02",
+      "series": "Kakao-Vol.1",
+      "author": "쯔니 (zzni)",
+      "is_animated": true,
+      "format": "webp",
+      "width": 360,
+      "height": 360,
+      "sha256": "aecb0b9e5132a878e1a953dc13a4eddcd5dc3f22c6b314007a6113db4f7ad201",
+      "dhash": "104f0dd6564e4e58",
+      "tags": [
+        "可爱",
+        "猫咪"
+      ],
+      "ocr_text": "",
+      "pinyin": "mianqiuxiaomao di1dan #02 ",
+      "pinyin_first": "mqxm d1d #02 ",
+      "category": [
+        "Kakao-Vol.1",
+        "animated"
+      ],
+      "url": "images/raw/kakao-01-02.webp",
+      "thumb_url": "images/thumbs/kakao-01-02.webp",
+      "source_url": ""
+    },
+    {
+      "id": "kakao-01-03",
+      "title": "棉球小猫 第1弹 #03",
+      "title_ko": "몽실몽실 냥냥이 #03",
+      "series": "Kakao-Vol.1",
+      "author": "쯔니 (zzni)",
+      "is_animated": true,
+      "format": "webp",
+      "width": 360,
+      "height": 360,
+      "sha256": "25ba255df232945f9ac0c50a3ef664d881a5a6ac62678c2e69f79dbec69cd23d",
+      "dhash": "180d4d9416160e46",
+      "tags": [
+        "可爱",
+        "猫咪"
+      ],
+      "ocr_text": "",
+      "pinyin": "mianqiuxiaomao di1dan #03 ",
+      "pinyin_first": "mqxm d1d #03 ",
+      "category": [
+        "Kakao-Vol.1",
+        "animated"
+      ],
+      "url": "images/raw/kakao-01-03.webp",
+      "thumb_url": "images/thumbs/kakao-01-03.webp",
+      "source_url": ""
+    },
+    {
+      "id": "kakao-01-04",
+      "title": "棉球小猫 第1弹 #04",
+      "title_ko": "몽실몽실 냥냥이 #04",
+      "series": "Kakao-Vol.1",
+      "author": "쯔니 (zzni)",
+      "is_animated": true,
+      "format": "webp",
+      "width": 360,
+      "height": 360,
+      "sha256": "d17147c28e08f93efa0a2fc9810e5c3eddd73b87e1c1f49f5708c3757591aac9",
+      "dhash": "04961696161e8e00",
+      "tags": [
+        "可爱",
+        "猫咪"
+      ],
+      "ocr_text": "",
+      "pinyin": "mianqiuxiaomao di1dan #04 ",
+      "pinyin_first": "mqxm d1d #04 ",
+      "category": [
+        "Kakao-Vol.1",
+        "animated"
+      ],
+      "url": "images/raw/kakao-01-04.webp",
+      "thumb_url": "images/thumbs/kakao-01-04.webp",
+      "source_url": ""
+    }
+  ]
+}
