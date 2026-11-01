@@ -189,5 +189,58 @@
     };
   }
 
-  window.CottonCat = { create, moodOf, phrase };
+  // ---------- 浏览器标签栏图标：每次打开随机一只小猫 ----------
+  const FAVICON_BG = ['#ff7ab8', '#ff9ccd', '#ffa9d6', '#f78fbe', '#ffb8dd'];
+  const FAVICON_BLUSH = ['#ffc8bd', '#ffb6c8', '#ffd9e6', '#ffc2b0'];
+  const FAVICON_KEY = 'mianqiu-favicon';
+
+  function faviconSvg(mood, bg, blush) {
+    const ink = '#4b3a41';
+    const line = `fill="none" stroke="${ink}" stroke-width="3.4" stroke-linecap="round"`;
+    const faces = {
+      idle: `<circle cx="24" cy="29" r="3.8" fill="${ink}"/><circle cx="40" cy="29" r="3.8" fill="${ink}"/>`,
+      happy: `<path d="M19 30 Q24 23 29 30" ${line}/><path d="M35 30 Q40 23 45 30" ${line}/><path d="M28 39 Q32 43 36 39" ${line}/>`,
+      squint: `<path d="M19 24.5 L28 29 L19 33.5" ${line}/><path d="M45 24.5 L36 29 L45 33.5" ${line}/><path d="M28 40 Q32 37 36 40" ${line}/>`,
+      sleepy: `<path d="M19 28 Q24 33 29 28" ${line}/><path d="M35 28 Q40 33 45 28" ${line}/>`,
+      love: `<path transform="translate(24 29) scale(.62)" d="${HEART}" fill="${ink}"/><path transform="translate(40 29) scale(.62)" d="${HEART}" fill="${ink}"/><path d="M28 39 Q32 43 36 39" ${line}/>`,
+      surprised: `<circle cx="24" cy="29" r="4.4" fill="${ink}"/><circle cx="40" cy="29" r="4.4" fill="${ink}"/><ellipse cx="32" cy="40" rx="2.8" ry="3.4" fill="${ink}"/>`,
+      angry: `<path d="M18 22 L28 26" ${line}/><path d="M46 22 L36 26" ${line}/><circle cx="24" cy="30" r="3.6" fill="${ink}"/><circle cx="40" cy="30" r="3.6" fill="${ink}"/><path d="M28 40 Q32 37.5 36 40" ${line}/>`
+    };
+    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">` +
+      `<rect width="64" height="64" rx="16" fill="${bg}"/>` +
+      `<path d="M15 18 L12 5 L27 12 Z" fill="#ffffff" stroke="${ink}" stroke-width="3.4" stroke-linejoin="round"/>` +
+      `<path d="M49 18 L52 5 L37 12 Z" fill="#ffffff" stroke="${ink}" stroke-width="3.4" stroke-linejoin="round"/>` +
+      `<path d="M14 30 C14 15 22 9 32 9 C42 9 50 15 50 30 C50 44 42 51 32 51 C22 51 14 44 14 30 Z" fill="#ffffff" stroke="${ink}" stroke-width="3.4" stroke-linejoin="round"/>` +
+      `<ellipse cx="17" cy="38" rx="5" ry="3.4" fill="${blush}"/>` +
+      `<ellipse cx="47" cy="38" rx="5" ry="3.4" fill="${blush}"/>` +
+      `${faces[mood] || faces.idle}</svg>`;
+  }
+
+  function randomFavicon() {
+    const link = document.getElementById('favicon');
+    if (!link) return;
+    const moods = ['idle', 'happy', 'squint', 'sleepy', 'love', 'surprised', 'angry'];
+    const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+
+    let last = '';
+    try { last = localStorage.getItem(FAVICON_KEY) || ''; } catch (e) { /* 隐私模式 */ }
+
+    let mood = '';
+    let bg = '';
+    let blush = '';
+    let sig = last;
+    // 最多试 8 次，尽量不和上一次撞脸
+    for (let i = 0; i < 8 && sig === last; i++) {
+      mood = pick(moods);
+      bg = pick(FAVICON_BG);
+      blush = pick(FAVICON_BLUSH);
+      sig = `${mood}|${bg}|${blush}`;
+    }
+    try { localStorage.setItem(FAVICON_KEY, sig); } catch (e) { /* 隐私模式 */ }
+
+    link.href = `data:image/svg+xml,${encodeURIComponent(faviconSvg(mood, bg, blush))}`;
+  }
+
+  window.CottonCat = { create, moodOf, phrase, randomFavicon };
+  randomFavicon();
 })();

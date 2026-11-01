@@ -241,4 +241,5 @@ python -m server.app --port 8000
   ```
 - 套系托盘：用每个套系的第一张表情当封面；`Kakao-Vol.N` 显示为「第N弹」，`Kakao-Mini.N` 显示为「迷你N弹」，社区两类显示为「二创梗图」「高清无字」（映射写在 `static/app.js` 的 `seriesLabel`）。
 - 首屏快捷词取自表情的图中文字（`ocr_text`），点一下就搜索，再点一下清空。
+- 标签栏图标：`static/favicon.svg` 是默认那只（开心脸），`static/cat.js` 的 `randomFavicon()` 在每次加载时用 7 种表情 × 5 种底色 × 4 种腮红随机生成一只，转成 data URI 替换 `<link id="favicon">`；用 localStorage 记住上一次的组合，最多试 8 次避开连续重复。整组约 140 种搭配，不保证任意两次都不同，只保证不跟上一次撞脸。
 - 小屏（≤720px）时筛选抽屉不吸顶，避免占掉三分之一屏幕。
