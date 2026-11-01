@@ -3,161 +3,164 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#dcecff" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#232845" media="(prefers-color-scheme: dark)">
   <title>棉球小猫表情库 (몽실몽실 냥냥이) | mianqiu-catHub</title>
+  <link rel="preload" href="static/fonts/zcool-kuaile-subset.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="static/style.css">
   <!-- 引入 JSZip 用于客户端无服务器并发打包下载 -->
-  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js" defer></script>
 </head>
 <body>
-  <!-- 顶部导航与作者署名条 -->
-  <header class="header">
-    <div class="header-inner">
-      <div class="brand">
-        <span class="brand-logo">🐾</span>
-        <div>
-          <h1 class="brand-title">棉球小猫表情库</h1>
-          <p class="brand-sub">몽실몽실 냥냥이 (Fluffy Meow Meow)</p>
-        </div>
-      </div>
-      <div class="attribution-badge">
-        <span>原作者：<b>쯔니 (zzni)</b></span>
-        <span class="sep">|</span>
-        <a href="https://e.kakao.com/creator/69020H" target="_blank" rel="noopener">Kakao 商店</a>
-        <span class="sep">|</span>
-        <a href="https://www.instagram.com/zz_ni_e" target="_blank" rel="noopener">Instagram</a>
-        <span class="sep">|</span>
-        <a href="#api-modal" id="open-api-btn">Bot API 约定</a>
-      </div>
-    </div>
+  <svg width="0" height="0" class="sr-only" aria-hidden="true">
+    <symbol id="cat-face" viewBox="0 0 64 52">
+      <path d="M5 50 C3 33 9 21 18 16 C17 9 19 3 24 3 C28 3 31 7 33 11 C35 10 39 10 41 11 C43 7 46 3 50 3 C55 3 57 9 56 16 C62 21 64 33 60 50 Z" fill="#fff" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/>
+      <ellipse cx="18" cy="37" rx="7" ry="5" fill="#ffc9ae"/>
+      <ellipse cx="47" cy="37" rx="7" ry="5" fill="#ffc9ae"/>
+      <circle cx="25" cy="31" r="2.6" fill="currentColor"/>
+      <circle cx="40" cy="31" r="2.6" fill="currentColor"/>
+    </symbol>
+  </svg>
+
+  <!-- 顶部署名条 -->
+  <header class="topbar">
+    <a class="wordmark" href="./" aria-label="棉球小猫表情库首页">
+      <svg class="wordmark-icon" aria-hidden="true"><use href="#cat-face"/></svg>
+      <span>棉球小猫表情库</span>
+    </a>
+    <nav class="credits" aria-label="作者与接口">
+      <span>原作者 <b>쯔니 (zzni)</b></span>
+      <a href="https://e.kakao.com/creator/69020H" target="_blank" rel="noopener">Kakao 商店</a>
+      <a href="https://www.instagram.com/zz_ni_e" target="_blank" rel="noopener">Instagram</a>
+      <button type="button" class="link-btn" id="open-api-btn">Bot API 约定</button>
+    </nav>
   </header>
 
-  <!-- 搜索与筛选工具栏 -->
-  <main class="container">
-    <section class="toolbar">
-      <div class="search-box">
-        <input type="text" id="search-input" placeholder="搜索表情、拼音(如 kaixin/kx)、标签或韩文..." autocomplete="off">
-        <button id="search-clear" class="btn-icon" title="清空搜索">✕</button>
-      </div>
+  <!-- 首屏：探头小猫 + 搜索 -->
+  <section class="hero">
+    <h1 class="hero-title">今天发哪只棉球？</h1>
+    <p class="hero-sub">
+      收录 <b id="hero-total">…</b> 张 몽실몽실 냥냥이 表情。<br>
+      搜「早八」「贴贴」，或者拼音首字母 <kbd>tt</kbd> 都能找到。
+    </p>
 
-      <div class="filter-row">
-        <!-- 动静图筛选 -->
-        <div class="btn-group" id="type-filter">
-          <button class="filter-btn active" data-type="all">全部</button>
-          <button class="filter-btn" data-type="animated">动图 GIF/WebP</button>
-          <button class="filter-btn" data-type="static">静图</button>
-        </div>
-
-        <!-- 套系下拉框 -->
-        <select id="series-select" class="select-box">
-          <option value="all">所有系列 (全部)</option>
-        </select>
-
-        <!-- 排序方式 -->
-        <select id="sort-select" class="select-box">
-          <option value="default">默认顺序</option>
-          <option value="random">随机乱序</option>
-          <option value="title">按名称排序</option>
-        </select>
-
-        <!-- 批量选择与下载 -->
-        <button id="batch-mode-btn" class="btn btn-secondary">批量选择</button>
-        <button id="batch-download-btn" class="btn btn-primary" style="display: none;">打包下载 (<span id="selected-count">0</span>)</button>
-      </div>
-
-      <!-- 快速标签筛选区 -->
-      <div class="tag-cloud" id="tag-cloud">
-        <!-- 标签动态渲染 -->
-      </div>
-    </section>
-
-    <!-- 统计信息 -->
-    <div class="stats-bar">
-      <span>已加载 <b id="displayed-count">0</b> / 共 <b id="total-count">0</b> 张表情</span>
-      <span class="license-tip">仅供自用与非商业交流，版权归原作者 쯔니 所有</span>
+    <div class="peek" aria-hidden="true">
+      <svg class="mascot" id="mascot" viewBox="0 0 260 172">
+        <path class="mascot-head" d="M18 174 C14 120 28 78 64 60 C60 40 66 22 80 20 C94 18 104 32 110 44 C122 41 138 41 150 44 C156 32 166 18 180 20 C194 22 200 40 196 60 C232 78 246 120 242 174"/>
+        <ellipse class="mascot-blush" cx="80" cy="128" rx="21" ry="14"/>
+        <ellipse class="mascot-blush" cx="180" cy="128" rx="21" ry="14"/>
+        <g class="mascot-eyes">
+          <g class="mascot-pupils" id="mascot-pupils">
+            <circle cx="106" cy="110" r="7.5"/>
+            <circle cx="154" cy="110" r="7.5"/>
+            <circle class="mascot-glint" cx="108.5" cy="107.5" r="2.2"/>
+            <circle class="mascot-glint" cx="156.5" cy="107.5" r="2.2"/>
+          </g>
+        </g>
+        <g class="mascot-tears">
+          <path d="M100 122 C96 132 94 140 100 143 C106 140 104 132 100 122 Z"/>
+          <path d="M160 122 C156 132 154 140 160 143 C166 140 164 132 160 122 Z"/>
+        </g>
+        <path class="mascot-paw" d="M56 174 C56 150 96 150 96 174"/>
+        <path class="mascot-paw" d="M164 174 C164 150 204 150 204 174"/>
+        <path class="mascot-toe" d="M70 165 v8 M82 165 v8 M178 165 v8 M190 165 v8"/>
+      </svg>
     </div>
 
-    <!-- 表情网格 (虚拟瀑布流 / 触底无限加载) -->
-    <section class="meme-grid" id="meme-grid">
-      <!-- 卡片由 app.js 动态渲染 -->
-    </section>
+    <div class="search-box">
+      <svg class="search-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 L20 20"/></svg>
+      <input type="search" id="search-input" placeholder="搜表情、拼音、标签或韩文" autocomplete="off" aria-label="搜索表情">
+      <button type="button" id="search-clear" class="search-clear" aria-label="清空搜索" hidden>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7 L17 17 M17 7 L7 17"/></svg>
+      </button>
+    </div>
 
-    <!-- 触底加载哨兵 -->
+    <div class="tag-cloud" id="tag-cloud" aria-label="热门标签"></div>
+  </section>
+
+  <main class="library">
+    <!-- 表情抽屉：套系标签栏 + 筛选 -->
+    <div class="drawer" id="drawer">
+      <div class="series-tabs" id="series-tabs" role="group" aria-label="按套系筛选"></div>
+      <div class="drawer-tools">
+        <div class="segmented" id="type-filter" role="group" aria-label="动图或静图">
+          <button type="button" class="seg-btn active" data-type="all" aria-pressed="true">全部</button>
+          <button type="button" class="seg-btn" data-type="animated" aria-pressed="false">动图</button>
+          <button type="button" class="seg-btn" data-type="static" aria-pressed="false">静图</button>
+        </div>
+        <div class="segmented" id="sort-filter" role="group" aria-label="排序">
+          <button type="button" class="seg-btn active" data-sort="default" aria-pressed="true">原顺序</button>
+          <button type="button" class="seg-btn" data-sort="random" aria-pressed="false">随机</button>
+          <button type="button" class="seg-btn" data-sort="title" aria-pressed="false">按名称</button>
+        </div>
+        <button type="button" id="batch-mode-btn" class="chunky-btn" aria-pressed="false">批量选择</button>
+      </div>
+    </div>
+
+    <p class="stats-line">
+      <span id="stats-scope">全部</span>
+      <span>已显示 <b id="displayed-count">0</b> / <b id="total-count">0</b> 张</span>
+    </p>
+
+    <!-- 表情网格 (触底无限加载) -->
+    <section class="meme-grid" id="meme-grid" aria-label="表情列表"></section>
+
     <div id="scroll-sentinel" class="scroll-sentinel">
-      <span id="loading-text">正在加载更多可爱小猫...</span>
+      <span id="loading-text" role="status">正在获取表情库索引...</span>
     </div>
   </main>
 
-  <!-- 大图灯箱弹窗 -->
-  <div id="lightbox" class="modal" style="display: none;">
-    <div class="modal-backdrop" id="lightbox-backdrop"></div>
-    <div class="modal-content lightbox-content">
-      <button class="modal-close" id="lightbox-close">✕</button>
-      <div class="lightbox-body">
-        <div class="lightbox-img-wrap">
-          <img id="lightbox-img" src="" alt="表情大图">
-        </div>
-        <div class="lightbox-info">
-          <h2 id="lightbox-title"></h2>
-          <p id="lightbox-title-ko" class="sub-text"></p>
-          <div class="info-row">
-            <span class="label">所属套系：</span>
-            <span id="lightbox-series"></span>
-          </div>
-          <div class="info-row">
-            <span class="label">尺寸/格式：</span>
-            <span id="lightbox-format"></span>
-          </div>
-          <div class="info-row">
-            <span class="label">标签：</span>
-            <div id="lightbox-tags" class="tag-list"></div>
-          </div>
-          <div class="lightbox-actions">
-            <button id="copy-link-btn" class="btn btn-secondary">复制图片链接</button>
-            <button id="copy-img-btn" class="btn btn-secondary">复制图片</button>
-            <a id="download-btn" class="btn btn-primary" download>下载原图</a>
-          </div>
-        </div>
+  <!-- 批量下载托盘 -->
+  <div class="batch-tray" id="batch-tray" hidden>
+    <span>已选 <b id="selected-count">0</b> 张</span>
+    <button type="button" id="batch-download-btn" class="chunky-btn chunky-btn-primary" disabled>打包下载</button>
+  </div>
+
+  <!-- 大图弹窗 -->
+  <dialog id="lightbox" class="sheet lightbox" aria-labelledby="lightbox-title">
+    <button type="button" class="sheet-close" id="lightbox-close" aria-label="关闭">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7 L17 17 M17 7 L7 17"/></svg>
+    </button>
+    <div class="lightbox-stage">
+      <img id="lightbox-img" alt="">
+    </div>
+    <div class="lightbox-info">
+      <h2 id="lightbox-title"></h2>
+      <p id="lightbox-title-ko" class="lightbox-ko" lang="ko"></p>
+      <dl class="lightbox-meta">
+        <dt>套系</dt><dd id="lightbox-series"></dd>
+        <dt>尺寸</dt><dd id="lightbox-format"></dd>
+      </dl>
+      <div id="lightbox-tags" class="tag-list"></div>
+      <div class="lightbox-actions">
+        <button type="button" id="copy-img-btn" class="chunky-btn">复制图片</button>
+        <button type="button" id="copy-link-btn" class="chunky-btn">复制链接</button>
+        <a id="download-btn" class="chunky-btn chunky-btn-primary" download>下载原图</a>
       </div>
     </div>
-  </div>
+  </dialog>
 
   <!-- Bot API 说明弹窗 -->
-  <div id="api-modal" class="modal" style="display: none;">
-    <div class="modal-backdrop" id="api-modal-backdrop"></div>
-    <div class="modal-content api-modal-content">
-      <button class="modal-close" id="api-modal-close">✕</button>
-      <h2>🤖 第三方 QQ Bot 只读 HTTP 接口约定</h2>
-      <p>面向第三方 QQ 机器人（OneBot / Lagrange / NoneBot 等）提供稳定的只读 HTTP 接口，数据格式向后兼容。</p>
-      
-      <div class="api-doc-item">
-        <span class="api-method">GET</span> <code>/api/v1/bot/random?tag=&animated=</code>
-        <p>随机返回一张表情，支持按标签或是否动图过滤。</p>
-      </div>
+  <dialog id="api-modal" class="sheet api-sheet" aria-labelledby="api-title">
+    <button type="button" class="sheet-close" id="api-modal-close" aria-label="关闭">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7 L17 17 M17 7 L7 17"/></svg>
+    </button>
+    <h2 id="api-title">QQ Bot 只读接口</h2>
+    <p>给 OneBot、Lagrange、NoneBot 等第三方机器人用的只读 HTTP 接口，字段只增不减。</p>
+    <ul class="api-list">
+      <li><code><span class="api-method">GET</span>/api/v1/bot/random?tag=&amp;animated=</code><p>随机返回一张表情，可按标签或动静图过滤。</p></li>
+      <li><code><span class="api-method">GET</span>/api/v1/bot/search?q=&amp;limit=10</code><p>关键词检索，支持中文、拼音、韩文原名和图中文字。</p></li>
+      <li><code><span class="api-method">GET</span>/api/v1/bot/emotes/{id}</code><p>单张表情的完整元数据和高清直链。</p></li>
+      <li><code><span class="api-method">GET</span>/api/v1/bot/tags</code><p>库内全部标签及对应数量。</p></li>
+      <li><code><span class="api-method">GET</span>/data/memes.json</code><p>全量静态快照，没有后端时 CDN 或 GitHub Pages 也能直接读。</p></li>
+    </ul>
+  </dialog>
 
-      <div class="api-doc-item">
-        <span class="api-method">GET</span> <code>/api/v1/bot/search?q=&limit=10</code>
-        <p>关键词全文检索（支持中文、拼音、韩文原名、OCR 文本）。</p>
-      </div>
-
-      <div class="api-doc-item">
-        <span class="api-method">GET</span> <code>/api/v1/bot/emotes/{id}</code>
-        <p>获取单张表情详细元数据与高清直链。</p>
-      </div>
-
-      <div class="api-doc-item">
-        <span class="api-method">GET</span> <code>/api/v1/bot/tags</code>
-        <p>获取当前库内所有可用标签及表情数量。</p>
-      </div>
-
-      <div class="api-doc-item">
-        <span class="api-method">GET</span> <code>/data/memes.json</code> (纯静态托管兜底)
-        <p>无需后端服务即可由 CDN / GitHub Pages 直连读取的全量静态元数据快照。</p>
-      </div>
-    </div>
-  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <footer class="footer">
-    <p>棉球小猫表情库 (mianqiu-catHub) · 个人自用非商业归档 · 形象著作权归原作者 쯔니 及 Kakao Corp 所有</p>
+    <svg class="footer-cat" aria-hidden="true"><use href="#cat-face"/></svg>
+    <p>个人自用、非商业归档。形象著作权归原作者 쯔니 (zzni) 及 Kakao Corp 所有，喜欢请去 Kakao 商店支持正版。</p>
   </footer>
 
   <script src="static/app.js"></script>

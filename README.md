@@ -143,9 +143,10 @@ mianqiu-catHub/
 │   ├── app.py              # FastAPI 只读 Bot HTTP 服务
 │   └── routes/             # 接口路由实现
 ├── static/
-│   ├── index.html          # 前端展示单页
-│   ├── app.js              # 虚拟瀑布流、拼音搜索、CDN 回退与 JSZip 打包
-│   └── style.css           # 响应式猫咪主题样式
+│   ├── index.html          # 前端展示单页（根目录 index.html 是它的副本，供 Cloudflare Pages 使用，两者需同步）
+│   ├── app.js              # 无限加载、拼音搜索、套系托盘、CDN 回退与 JSZip 打包
+│   ├── style.css           # 「棉花糖天空 + 贴纸」主题样式，含深色与小屏适配
+│   └── fonts/              # ZCOOL 快乐体子集 woff2（OFL 授权，见 ZCOOLKuaiLe-OFL.txt）
 ├── requirements.txt        # Python 依赖
 └── README.md               # 本项目说明文档
 ```
@@ -200,3 +201,18 @@ python -m server.app --port 8000
 - nginx：`/etc/nginx/conf.d/mianhuacat.elma-gohan.xyz.conf`，80 → 301 到 443，只放行 `/`、`/static/`、`/data/`、`/images/`、`/api/v1/bot/`，其余一律 404（服务端源码、`/docs`、`/openapi.json` 均不暴露）。
 - 证书：Let's Encrypt（webroot `/var/www/certbot`），2027-01-30 到期，由服务器上的 `certbot.timer` 自动续期。
 - 发布：`deploy/deploy.sh [user@host]`，健康检查失败自动回滚软链；nginx 配置测试失败则撤掉本站点配置。
+
+## 前端视觉（2026-11-01 重构）
+
+- 方向：「棉花糖天空 + 贴纸」。浅天蓝底配白色棉花云，表情卡片、按钮、搜索框都做成粗墨线描边的白色贴纸，和原作的手绘线条呼应；首屏有一只 SVG 小猫趴在搜索框上，眼睛跟着鼠标转，搜不到结果时会哭。
+- 标题字体：ZCOOL 快乐体（Google Fonts，OFL），只保留页面文案和表情标题里出现的 472 个字，子集 woff2 约 43 KB。**新增带新汉字的文案或表情标题后，需要重新生成子集**，否则缺字会回落到系统字体：
+  ```bash
+  # 1. 从 static/index.html、static/app.js 和 data/memes.json 的 title/ocr_text 收集字符到 chars.txt
+  # 2. 用 Google Fonts 的 ZCOOLKuaiLe-Regular.ttf 生成子集
+  uv run --with fonttools --with brotli pyftsubset ZCOOLKuaiLe-Regular.ttf \
+    --text-file=chars.txt --flavor=woff2 --layout-features='*' \
+    --output-file=static/fonts/zcool-kuaile-subset.woff2
+  ```
+- 套系托盘：用每个套系的第一张表情当封面；`Kakao-Vol.N` 显示为「第N弹」，`Kakao-Mini.N` 显示为「迷你N弹」，社区两类显示为「二创梗图」「高清无字」（映射写在 `static/app.js` 的 `seriesLabel`）。
+- 首屏快捷词取自表情的图中文字（`ocr_text`），点一下就搜索，再点一下清空。
+- 小屏（≤720px）时筛选抽屉不吸顶，避免占掉三分之一屏幕。
