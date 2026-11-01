@@ -131,12 +131,14 @@ mianqiu-catHub/
 │   ├── series.json         # 套系归档目录
 │   └── tags.json           # 标签字典
 ├── images/
-│   ├── raw/                # 原始动图/静图文件 (GIF / WebP / PNG)
-│   └── thumbs/             # 200px 极速 WebP 缩略图
+│   ├── raw/                # 原始动图/静图文件 (动图基本都是 Animated WebP)
+│   ├── thumbs/             # 200px 极速 WebP 缩略图（静态首帧）
+│   └── gif/                # 由 scripts/export_gif.py 预生成的 GIF 版，供下载
 ├── scripts/
 │   ├── fetch_kakao.py      # Kakao 官方全套表情抓取与解析器
 │   ├── import_local.py     # 本地文件/QQ 表情缓存导入清洗器
 │   ├── fetch_url.py        # 单张/批量 URL (含小红书等) 抓取器
+│   ├── export_gif.py       # 动图转 GIF（供下载，保留透明与时长）
 │   ├── build_index.py      # 扫描生成 memes.json、缩略图与 dHash 去重
 │   └── image_utils.py      # 格式转换、200px WebP 缩略图生成与感知哈希
 ├── server/
@@ -214,6 +216,9 @@ python -m server.app --port 8000
   - 搜不到结果时小猫哭；25 秒不操作它会睡着，一动就醒。
   - 首屏小猫滚出视口后，右下角会探出一只小猫伙伴接替上面这些互动。
 - 动图播放：缩略图（`images/thumbs/`）是静态首帧。贴纸进入视口后，前端在后台预载 `images/raw/` 里的原图动图，加载完再替换，避免闪白。代价是流量变大：首屏 36 张原图共约 10 MB（实测文件大小），只用缩略图时约 280 KB；全部 469 张原图共 87 MB。滚到哪里才加载到哪里。如果服务器带宽吃紧，可以改为生成 160–200px 的动态 WebP 缩略图，每张实测约 80–90 KB（抽样 40 张），但需要改 `scripts/image_utils.py` 并重建 `images/thumbs/`，目前没做。
+- 下载格式：源图全是 Animated WebP（Kakao CDN 与社区图源只提供 WebP），QQ、微信等客户端对 WebP 表情支持不稳定，所以用 `scripts/export_gif.py` 预先把全部表情转成 GIF 放在 `images/gif/`（469 个，共 56 MB，转换约 20 秒）。大图弹窗有「下载 GIF」和「下载原图」两个按钮；批量托盘可选 GIF 或原图，打包用 JSZip 在前端完成，GIF 缺失时自动回退原图。
+  - 转换要点：逐帧时长从 WebP 的 ANMF 块直接读（Pillow 解码前读不到 `duration`）；GIF 延迟只能按 10ms 存，按累计时间补偿取整，否则每帧 119ms、149ms 会被截成 110ms、140ms，几十帧累积成几百毫秒；透明色用调色板保留索引 255，帧间用 `disposal=2`。
+  - 新增表情后重跑：`python -m scripts.export_gif`（默认只补缺失的，`--force` 全部重建）。
 - 标题字体：ZCOOL 快乐体（Google Fonts，OFL），只保留页面文案、小猫台词和表情标题里出现的 583 个字，子集 woff2 约 55 KB。**新增带新汉字的文案、台词或表情标题后，需要重新生成子集**，否则缺字会回落到系统字体：
   ```bash
   # 1. 从 static/index.html、static/app.js、static/cat.js 和 data/memes.json 的 title/ocr_text 收集字符到 chars.txt

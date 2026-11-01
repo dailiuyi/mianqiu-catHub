@@ -38,6 +38,7 @@
   let searchQuery = '';
 
   let isBatchMode = false;
+  let batchFormat = 'gif';
   const selectedSet = new Set();
   let currentLightboxMeme = null;
 
@@ -70,6 +71,7 @@
   const batchModeBtn = $('batch-mode-btn');
   const batchTray = $('batch-tray');
   const batchDownloadBtn = $('batch-download-btn');
+  const batchFormatBtns = document.querySelectorAll('#batch-format .seg-btn');
   const selectedCountEl = $('selected-count');
 
   const lightbox = $('lightbox');
@@ -82,6 +84,7 @@
   const copyLinkBtn = $('copy-link-btn');
   const copyImgBtn = $('copy-img-btn');
   const downloadBtn = $('download-btn');
+  const downloadGifBtn = $('download-gif-btn');
 
   const apiModal = $('api-modal');
   const toast = $('toast');
@@ -398,6 +401,11 @@
     return base ? `${base.replace(/\/$/, '')}/${relPath.replace(/^\//, '')}` : relPath;
   }
 
+  // GIF 版由 scripts/export_gif.py 预先生成，放在 images/gif/{id}.gif
+  function gifPath(meme) {
+    return `images/gif/${meme.id}.gif`;
+  }
+
   // 无限滚动监听
   function setupIntersectionObserver() {
     const observer = new IntersectionObserver((entries) => {
@@ -510,7 +518,10 @@
     });
 
     downloadBtn.href = rawUrl;
-    downloadBtn.setAttribute('download', `${meme.title || meme.id}.${meme.format || 'gif'}`);
+    downloadBtn.setAttribute('download', `${meme.title || meme.id}.${meme.format || 'webp'}`);
+    const gifUrl = resolveAssetUrl(gifPath(meme));
+    downloadGifBtn.href = gifUrl;
+    downloadGifBtn.setAttribute('download', `${meme.title || meme.id}.gif`);
 
     if (!lightbox.open) lightbox.showModal();
   }
@@ -553,7 +564,7 @@
     applyFilters();
   }
 
-  // JSZip 客户端并发限流下载
+  // JSZip 客户端并发限流下载。格式可选 GIF（通用）或原图 WebP；GIF 缺失时自动回退原图
   async function downloadSelectedZip() {
     if (selectedSet.size === 0) return;
     if (typeof JSZip === 'undefined') {
@@ -561,6 +572,7 @@
       return;
     }
 
+    const wantGif = batchFormat === 'gif';
     const zip = new JSZip();
     const folder = zip.folder('mianqiu-cat-emotes');
     const selectedMemes = allMemes.filter(m => selectedSet.has(m.id));
@@ -571,16 +583,23 @@
     const CONCURRENCY = 6;
     let index = 0;
 
+    async function fetchBlob(path) {
+      const resp = await fetch(resolveAssetUrl(path));
+      return resp.ok ? resp.blob() : null;
+    }
+
     async function worker() {
       while (index < selectedMemes.length) {
         const item = selectedMemes[index++];
-        const url = resolveAssetUrl(item.url);
         try {
-          const resp = await fetch(url);
-          if (resp.ok) {
-            const blob = await resp.blob();
-            folder.file(`${item.title || item.id}.${item.format || 'gif'}`, blob);
+          let ext = item.format || 'webp';
+          let blob = wantGif ? await fetchBlob(gifPath(item)) : null;
+          if (blob) {
+            ext = 'gif';
+          } else {
+            blob = await fetchBlob(item.url);
           }
+          if (blob) folder.file(`${item.title || item.id}.${ext}`, blob);
         } catch (e) {
           console.warn('下载单张表情包失败:', item.id, e);
         }
@@ -594,13 +613,13 @@
 
     const a = document.createElement('a');
     a.href = URL.createObjectURL(content);
-    a.download = `棉球小猫表情包_${selectedMemes.length}张.zip`;
+    a.download = `棉球小猫表情包_${selectedMemes.length}张_${wantGif ? 'GIF' : '原图'}.zip`;
     a.click();
     URL.revokeObjectURL(a.href);
 
     batchDownloadBtn.disabled = false;
     batchDownloadBtn.textContent = '打包下载';
-    showToast(`已打包 ${selectedMemes.length} 张`);
+    showToast(`已打包 ${selectedMemes.length} 张（${wantGif ? 'GIF' : '原图'}）`);
     activeCat().flash('love', 1600);
   }
 
@@ -679,6 +698,7 @@
 
     bindSegmented(typeFilterBtns, btn => { activeType = btn.dataset.type; });
     bindSegmented(sortFilterBtns, btn => { activeSort = btn.dataset.sort; });
+    bindSegmented(batchFormatBtns, btn => { batchFormat = btn.dataset.format; });
 
     batchModeBtn.addEventListener('click', () => setBatchMode(!isBatchMode));
     batchDownloadBtn.addEventListener('click', downloadSelectedZip);

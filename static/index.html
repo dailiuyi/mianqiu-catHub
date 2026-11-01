@@ -94,6 +94,10 @@
   <!-- 批量下载托盘 -->
   <div class="batch-tray" id="batch-tray" hidden>
     <span>已选 <b id="selected-count">0</b> 张</span>
+    <div class="segmented" id="batch-format" role="group" aria-label="打包格式">
+      <button type="button" class="seg-btn active" data-format="gif" aria-pressed="true">GIF</button>
+      <button type="button" class="seg-btn" data-format="raw" aria-pressed="false">原图</button>
+    </div>
     <button type="button" id="batch-download-btn" class="chunky-btn chunky-btn-primary" disabled>打包下载</button>
   </div>
 
@@ -116,7 +120,8 @@
       <div class="lightbox-actions">
         <button type="button" id="copy-img-btn" class="chunky-btn">复制图片</button>
         <button type="button" id="copy-link-btn" class="chunky-btn">复制链接</button>
-        <a id="download-btn" class="chunky-btn chunky-btn-primary" download>下载原图</a>
+        <a id="download-gif-btn" class="chunky-btn chunky-btn-primary" download>下载 GIF</a>
+        <a id="download-btn" class="chunky-btn" download>下载原图</a>
       </div>
     </div>
   </dialog>
