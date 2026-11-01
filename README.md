@@ -230,8 +230,8 @@ bash -n deploy/deploy.sh
 - 两份 HTML 的图片格式说明改为直接使用响应中的 `url`，需要 GIF 时按 `id` 拼接 `/images/gif/{id}.gif`；保留跟踪猫 32 张 PNG 原图，不转换素材。
 - 验证：25 项 pytest 通过；独立 Node 进程执行真实 Pages handler，重跑不存在的标签、套系及互斥过滤组合，均返回 200 与空结果信封；有效 PNG 请求仍返回可读取的原图地址。FastAPI 边界场景及两份 HTML 一致性检查通过。
 - 范围：仅修复本次 review 的无匹配状态码和格式说明；Pages 原有的参数校验及缺失 id 响应差异未调整，不代表两套后端完整契约一致。
-- 生产部署：分支 `fix/bot-contract-minimal` 的应用提交 `f97a445` 已发布为 `rel-20261101T161334Z`；服务 PID 更新为 `2899728`、状态 active，`nginx -t` 通过。公网重跑无匹配、缺失 id、非法布尔、分页和 PNG/GIF 路径检查通过；浏览器确认 API 弹窗的 8 行入口及新格式说明可见，搜索「早八」仍得到 1 张。
-- 回滚目标：`rel-20261101T155049Z`；发布前列出的旧版本 `rel-20261101T150927Z` 已按三版本保留规则清理，统计计数未清零。当前仅部署生产 FastAPI 服务，未执行 Cloudflare Pages 发布；该 handler 的修复已在独立 Node 进程中验证。
+- 合并与部署：`fix/bot-contract-minimal` 从 `main` 快进合并，应用提交 `f97a445`、记录提交 `658994f`；从 `main` 发布 `rel-20261101T162332Z`，服务 PID `2899930`、状态 active，`nginx -t` 通过。公网复验无匹配、缺失 id、详情页和 PNG/GIF 路径均正常。
+- 回滚目标：`rel-20261101T161334Z`；`rel-20261101T155049Z` 同时保留，发布前更早的 `rel-20261101T150927Z` 已按三版本规则清理，统计计数未清零。当前仅部署生产 FastAPI 服务，未执行 Cloudflare Pages 发布；该 handler 的修复已在独立 Node 进程中验证。
 
 ## 📊 真实访问统计（2026-11-01）
 
