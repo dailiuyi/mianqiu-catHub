@@ -117,11 +117,23 @@ def fetch_and_save_kakao_pack(
             continue
 
         try:
-            r = client.get(img_url, headers=HEADERS, timeout=20.0)
-            if r.status_code != 200:
-                logging.warning("下载 %s 失败，HTTP %d", img_url, r.status_code)
-                continue
-            data = r.content
+            # 检查本地是否已有下载好的文件
+            existing_file = None
+            for check_ext in ("webp", "gif", "png"):
+                check_path = os.path.join(raw_dir, f"{item_id}.{check_ext}")
+                if os.path.exists(check_path) and os.path.getsize(check_path) > 0:
+                    existing_file = check_path
+                    break
+
+            if existing_file:
+                with open(existing_file, "rb") as ef:
+                    data = ef.read()
+            else:
+                r = client.get(img_url, headers=HEADERS, timeout=20.0)
+                if r.status_code != 200:
+                    logging.warning("下载 %s 失败，HTTP %d", img_url, r.status_code)
+                    continue
+                data = r.content
 
             # 识别格式
             ext = detect_image_format(data) or "webp"
