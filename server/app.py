@@ -278,7 +278,7 @@ DETAIL_PAGE = """<!DOCTYPE html>
 <meta name="theme-color" content="#ff9ccd">
 <title>{page_title} · 棉球小猫表情库</title>
 <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
-<link rel="stylesheet" href="/static/style.css?v=cat-expressions-1">
+<link rel="stylesheet" href="/static/style.css?v=cat-expressions-2">
 </head>
 <body class="detail-page">
 <header class="detail-bar">
