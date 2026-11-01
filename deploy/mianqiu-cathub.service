@@ -1,0 +1,22 @@
+[Unit]
+Description=Mianqiu CatHub read-only Bot API
+After=network.target
+
+[Service]
+Type=simple
+User=mianqiu
+Group=mianqiu
+WorkingDirectory=/opt/mianqiu-cathub/current
+Environment=PYTHONDONTWRITEBYTECODE=1
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/opt/mianqiu-cathub/venv/bin/uvicorn server.app:app --host 127.0.0.1 --port 8093 --proxy-headers --forwarded-allow-ips=127.0.0.1
+Restart=on-failure
+RestartSec=3
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+MemoryMax=256M
+
+[Install]
+WantedBy=multi-user.target

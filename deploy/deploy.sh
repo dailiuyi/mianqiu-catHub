@@ -1,43 +1,57 @@
 #!/usr/bin/env bash
+# Deploy mianqiu-catHub to the elma-gohan server (release dirs + symlink swap).
+# Usage: SSH_KEY=~/.ssh/id_ed25519_elma_gohan deploy/deploy.sh [user@host]
 set -euo pipefail
 
-SSH_TARGET="${1:-}"
-if [ -z "$SSH_TARGET" ]; then
-    echo "用法: $0 <user@host 或 ssh_alias>"
-    exit 1
-fi
+cd "$(dirname "$0")/.."
+TARGET="${1:-root@elma-gohan.xyz}"
+SSH_KEY="${SSH_KEY:-$HOME/.ssh/id_ed25519_elma_gohan}"
+SSH=(ssh -i "$SSH_KEY" -o IdentitiesOnly=yes -o BatchMode=yes "$TARGET")
+RELEASE="rel-$(date -u +%Y%m%dT%H%M%SZ)"
+BASE=/opt/mianqiu-cathub
 
-echo "=== 正在打包发布资源 ==="
-RELEASE_TAR="/tmp/mianqiu-cathub-release.tar.gz"
-tar --exclude='.git' --exclude='.venv' --exclude='__pycache__' --exclude='.wrangler' -czf "$RELEASE_TAR" .
+echo "== upload $RELEASE"
+tar -czf - --exclude='__pycache__' index.html static data images server requirements-server.txt \
+  | "${SSH[@]}" "install -d -m 0755 $BASE/releases/$RELEASE && tar -xzf - -C $BASE/releases/$RELEASE"
+scp -q -i "$SSH_KEY" -o IdentitiesOnly=yes -o BatchMode=yes \
+  deploy/mianqiu-cathub.service deploy/mianhuacat.elma-gohan.xyz.conf "$TARGET:/tmp/"
 
-echo "=== 正在上传至远程服务器 $SSH_TARGET ==="
-scp "$RELEASE_TAR" "$SSH_TARGET:/tmp/mianqiu-cathub-release.tar.gz"
-
-echo "=== 执行远程服务部署与 Nginx 配置 ==="
-ssh "$SSH_TARGET" "bash -s" << 'EOF'
+"${SSH[@]}" bash -s "$RELEASE" <<'REMOTE'
 set -euo pipefail
-mkdir -p /var/www/mianqiu-catHub
-tar -xzf /tmp/mianqiu-cathub-release.tar.gz -C /var/www/mianqiu-catHub
-cd /var/www/mianqiu-catHub
+RELEASE="$1"; BASE=/opt/mianqiu-cathub
+id mianqiu >/dev/null 2>&1 || useradd --system --no-create-home --shell /usr/sbin/nologin mianqiu
+[ -d $BASE/venv ] || python3 -m venv $BASE/venv
+$BASE/venv/bin/pip install -q -i https://pypi.tuna.tsinghua.edu.cn/simple -r $BASE/releases/$RELEASE/requirements-server.txt
+chown -R root:root $BASE/releases/$RELEASE
+find $BASE/releases/$RELEASE -type d -exec chmod 0755 {} + ; find $BASE/releases/$RELEASE -type f -exec chmod 0644 {} +
 
-if [ ! -d .venv ]; then
-    python3 -m venv .venv
-    .venv/bin/pip install -i https://pypi.tuna.tsinghua.edu.cn/simple -r requirements.txt
-fi
-
-cp deploy/systemd/mianqiu-cathub.service /etc/systemd/system/
+PREV=$(readlink -f $BASE/current 2>/dev/null || true)
+ln -sfn $BASE/releases/$RELEASE $BASE/current
+install -m 0644 /tmp/mianqiu-cathub.service /etc/systemd/system/mianqiu-cathub.service
 systemctl daemon-reload
-systemctl enable --now mianqiu-cathub.service
-systemctl restart mianqiu-cathub.service
+systemctl enable mianqiu-cathub >/dev/null 2>&1
+systemctl restart mianqiu-cathub
 
-if [ -d /etc/nginx/sites-available ]; then
-    cp deploy/nginx/cat.elma-gohan.xyz.conf /etc/nginx/sites-available/
-    ln -sf /etc/nginx/sites-available/cat.elma-gohan.xyz.conf /etc/nginx/sites-enabled/
-elif [ -d /etc/nginx/conf.d ]; then
-    cp deploy/nginx/cat.elma-gohan.xyz.conf /etc/nginx/conf.d/
+rollback() {
+  echo "!! health check failed, rolling back"
+  [ -n "$PREV" ] && ln -sfn "$PREV" $BASE/current && systemctl restart mianqiu-cathub
+  exit 1
+}
+for _ in 1 2 3 4 5 6 7 8 9 10; do
+  curl -fsS http://127.0.0.1:8093/api/v1/bot/summary >/dev/null 2>&1 && ok=1 && break
+  sleep 1
+done
+[ "${ok:-}" = 1 ] || rollback
+
+NGX=/etc/nginx/conf.d/mianhuacat.elma-gohan.xyz.conf
+[ -f $NGX ] && cp $NGX $NGX.bak-$RELEASE
+install -m 0644 /tmp/mianhuacat.elma-gohan.xyz.conf $NGX
+if nginx -t 2>/dev/null; then
+  systemctl reload nginx
+else
+  nginx -t; echo "!! nginx test failed, removing our vhost"; rm -f $NGX; exit 1
 fi
-
-nginx -t && systemctl reload nginx
-echo "=== 部署完成！服务已在 http://cat.elma-gohan.xyz 运行 ==="
-EOF
+ls -1dt $BASE/releases/rel-* | tail -n +4 | xargs -r rm -rf
+rm -f /tmp/mianqiu-cathub.service /tmp/mianhuacat.elma-gohan.xyz.conf
+echo "DEPLOYED $RELEASE"
+REMOTE
