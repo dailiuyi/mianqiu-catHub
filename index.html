@@ -136,15 +136,6 @@
     <p class="api-lead">面向 OneBot / Lagrange / NoneBot 等第三方机器人提供只读 HTTP 接口，数据格式向后兼容，字段只增不减。</p>
 
     <section class="api-block">
-      <h3>接入步骤</h3>
-      <ol class="api-steps">
-        <li>浏览器打开任意接口地址，返回 JSON 即接口可用。</li>
-        <li>机器人在对话里请求接口，取 <code>data.url</code>（搜索接口取 <code>data.items[0].url</code>）作为图片地址发送。</li>
-        <li>需要收窄范围时加 <code>tag</code>、<code>series</code>、<code>animated</code> 参数。</li>
-      </ol>
-    </section>
-
-    <section class="api-block">
       <h3>接口</h3>
       <ul class="api-list">
         <li data-path="/api/v1/bot/random">
