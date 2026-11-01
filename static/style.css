@@ -8,6 +8,7 @@
 }
 
 :root {
+  color-scheme: light;
   --page-bg: linear-gradient(165deg, #ff9ccd 0%, #ffbfdc 42%, #ffe2ef 100%);
   --dots: rgba(255, 255, 255, 0.42);
   --cotton: #ffffff;
@@ -26,18 +27,6 @@
   --font-display: "ZCOOL KuaiLe", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
   --font-body: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Noto Sans CJK SC", "Microsoft YaHei", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
   --pop: cubic-bezier(0.3, 1.6, 0.5, 1);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --page-bg: linear-gradient(165deg, #5a2450 0%, #3a2234 45%, #2a1f26 100%);
-    --dots: rgba(255, 255, 255, 0.06);
-    --text: #ffeef4;
-    --muted: #d4b4c3;
-    --pink-shadow: #1c1418;
-    --cloud: #4f2a47;
-    --focus: #ff9ad0;
-  }
 }
 
 *, *::before, *::after { box-sizing: border-box; }
