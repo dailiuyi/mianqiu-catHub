@@ -104,7 +104,10 @@
   // 套系展示名：Kakao-Vol.3 → 第3弹，Kakao-Mini.2 → 迷你2弹
   const SERIES_LABELS = {
     community_caption: '二创梗图',
-    community_clean: '高清无字'
+    community_clean: '高清无字',
+    'Kakao-FollowCat': '跟踪猫',
+    'Kakao-ShortCat.1': '短毛猫1',
+    'Kakao-ShortCat.2': '短毛猫2'
   };
 
   function seriesLabel(series) {
@@ -124,7 +127,10 @@
     const mini = series.match(/^Kakao-Mini\.(\d+)$/);
     if (mini) return 100 + Number(mini[1]);
     if (series.startsWith('community')) return 200;
-    return 300;
+    if (series === 'Kakao-FollowCat') return 301;
+    if (series === 'Kakao-ShortCat.1') return 302;
+    if (series === 'Kakao-ShortCat.2') return 303;
+    return 400;
   }
 
   // 表情对应的小猫心情：先看图中文字和标题；官方原版多数没有文字，按 id 固定挑一种

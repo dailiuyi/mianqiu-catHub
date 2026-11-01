@@ -36,6 +36,9 @@ KAKAO_SERIES_CATALOG = [
     {"vol": 103, "slug": "mini-meow-meow-3", "title_ko": "미니미니 냥냥이 3", "title_zh": "迷你棉球小猫 第3弹", "series_id": "Kakao-Mini.3"},
     {"vol": 104, "slug": "mini-meow-meow-4", "title_ko": "미니미니 냥냥이 4", "title_zh": "迷你棉球小猫 第4弹", "series_id": "Kakao-Mini.4"},
     {"vol": 105, "slug": "mini-meow-meow-5", "title_ko": "미니미니 냥냥이 5", "title_zh": "迷你棉球小猫 第5弹", "series_id": "Kakao-Mini.5"},
+    {"vol": 201, "slug": "anyways-cats", "title_ko": "요태까지 날 미행한 고양", "title_zh": "暗中跟踪猫", "series_id": "Kakao-FollowCat"},
+    {"vol": 202, "slug": "korean-shorthair-cat", "title_ko": "코숏이들", "title_zh": "短毛猫 第1弹", "series_id": "Kakao-ShortCat.1"},
+    {"vol": 203, "slug": "korean-shorthair-cat-2", "title_ko": "코숏이들 2", "title_zh": "短毛猫 第2弹", "series_id": "Kakao-ShortCat.2"},
 ]
 
 HEADERS = {
@@ -222,7 +225,7 @@ def main():
                 "series_id": f"Kakao-{args.slug}",
             })
     elif args.mini:
-        targets = [item for item in KAKAO_SERIES_CATALOG if item["vol"] > 100]
+        targets = [item for item in KAKAO_SERIES_CATALOG if 100 < item["vol"] <= 200]
     elif args.all:
         targets = KAKAO_SERIES_CATALOG
     else:

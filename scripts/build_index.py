@@ -125,12 +125,27 @@ def build_index() -> Dict[str, Any]:
                 if len(parts) >= 3 and parts[1].isdigit():
                     vol_num = int(parts[1])
                     idx_num = int(parts[2]) if parts[2].isdigit() else parts[2]
-                    if vol_num > 100:
+                    if 100 < vol_num <= 200:
                         mini_idx = vol_num - 100
                         series = f"Kakao-Mini.{mini_idx}"
                         if not title or title == base_name:
                             title = f"迷你棉球小猫 第{mini_idx}弹 #{idx_num:02d}"
                             title_ko = f"미니미니 냥냥이 #{idx_num:02d}" if mini_idx == 1 else f"미니미니 냥냥이 {mini_idx} #{idx_num:02d}"
+                    elif vol_num == 201:
+                        series = "Kakao-FollowCat"
+                        if not title or title == base_name:
+                            title = f"暗中跟踪猫 #{idx_num:02d}"
+                            title_ko = f"요태까지 날 미행한 고양 #{idx_num:02d}"
+                    elif vol_num == 202:
+                        series = "Kakao-ShortCat.1"
+                        if not title or title == base_name:
+                            title = f"韩国短毛猫 第1弹 #{idx_num:02d}"
+                            title_ko = f"코숏이들 #{idx_num:02d}"
+                    elif vol_num == 203:
+                        series = "Kakao-ShortCat.2"
+                        if not title or title == base_name:
+                            title = f"韩国短毛猫 第2弹 #{idx_num:02d}"
+                            title_ko = f"코숏이들 2 #{idx_num:02d}"
                     else:
                         series = f"Kakao-Vol.{vol_num}"
                         if not title or title == base_name:

@@ -2,19 +2,31 @@
   "tags": [
     {
       "name": "可爱",
-      "count": 469
+      "count": 569
     },
     {
       "name": "猫咪",
-      "count": 469
+      "count": 569
     },
     {
       "name": "韩系",
-      "count": 411
+      "count": 495
     },
     {
       "name": "官方原版",
-      "count": 411
+      "count": 495
+    },
+    {
+      "name": "二创",
+      "count": 50
+    },
+    {
+      "name": "梗图",
+      "count": 50
+    },
+    {
+      "name": "community_caption",
+      "count": 50
     },
     {
       "name": "Kakao-Mini.1",
@@ -37,16 +49,8 @@
       "count": 35
     },
     {
-      "name": "二创",
-      "count": 30
-    },
-    {
-      "name": "梗图",
-      "count": 30
-    },
-    {
-      "name": "community_caption",
-      "count": 30
+      "name": "Kakao-FollowCat",
+      "count": 32
     },
     {
       "name": "社区高清",
@@ -58,6 +62,10 @@
     },
     {
       "name": "community_clean",
+      "count": 24
+    },
+    {
+      "name": "Kakao-Vol.1",
       "count": 24
     },
     {
@@ -97,8 +105,12 @@
       "count": 24
     },
     {
-      "name": "Kakao-Vol.1",
-      "count": 20
+      "name": "Kakao-ShortCat.1",
+      "count": 24
+    },
+    {
+      "name": "Kakao-ShortCat.2",
+      "count": 24
     },
     {
       "name": "官方合作",
@@ -114,10 +126,22 @@
     },
     {
       "name": "打工人",
+      "count": 4
+    },
+    {
+      "name": "摸鱼",
       "count": 2
     },
     {
       "name": "摆烂",
+      "count": 2
+    },
+    {
+      "name": "委屈",
+      "count": 2
+    },
+    {
+      "name": "摸摸",
       "count": 2
     },
     {
@@ -126,6 +150,22 @@
     },
     {
       "name": "撒娇",
+      "count": 2
+    },
+    {
+      "name": "晚安",
+      "count": 2
+    },
+    {
+      "name": "生气",
+      "count": 2
+    },
+    {
+      "name": "抓狂",
+      "count": 2
+    },
+    {
+      "name": "飞奔",
       "count": 2
     },
     {
@@ -146,10 +186,6 @@
     },
     {
       "name": "不想上班",
-      "count": 1
-    },
-    {
-      "name": "摸鱼",
       "count": 1
     },
     {
@@ -194,10 +230,6 @@
     },
     {
       "name": "耶",
-      "count": 1
-    },
-    {
-      "name": "委屈",
       "count": 1
     },
     {
@@ -253,10 +285,6 @@
       "count": 1
     },
     {
-      "name": "摸摸",
-      "count": 1
-    },
-    {
       "name": "贴贴",
       "count": 1
     },
@@ -266,10 +294,6 @@
     },
     {
       "name": "粘人",
-      "count": 1
-    },
-    {
-      "name": "晚安",
       "count": 1
     },
     {
@@ -326,10 +350,6 @@
     },
     {
       "name": "吃瓜群众",
-      "count": 1
-    },
-    {
-      "name": "生气",
       "count": 1
     },
     {
@@ -474,10 +494,6 @@
     },
     {
       "name": "救我",
-      "count": 1
-    },
-    {
-      "name": "抓狂",
       "count": 1
     },
     {
@@ -685,15 +701,375 @@
       "count": 1
     },
     {
-      "name": "飞奔",
-      "count": 1
-    },
-    {
       "name": "快乐",
       "count": 1
     },
     {
       "name": "放假了",
+      "count": 1
+    },
+    {
+      "name": "偷懒",
+      "count": 1
+    },
+    {
+      "name": "划水",
+      "count": 1
+    },
+    {
+      "name": "轻松",
+      "count": 1
+    },
+    {
+      "name": "我太难了",
+      "count": 1
+    },
+    {
+      "name": "头疼",
+      "count": 1
+    },
+    {
+      "name": "无奈",
+      "count": 1
+    },
+    {
+      "name": "崩溃",
+      "count": 1
+    },
+    {
+      "name": "叹气",
+      "count": 1
+    },
+    {
+      "name": "加班",
+      "count": 1
+    },
+    {
+      "name": "深夜",
+      "count": 1
+    },
+    {
+      "name": "熬夜",
+      "count": 1
+    },
+    {
+      "name": "苦涩",
+      "count": 1
+    },
+    {
+      "name": "别催了",
+      "count": 1
+    },
+    {
+      "name": "捂耳朵",
+      "count": 1
+    },
+    {
+      "name": "不听",
+      "count": 1
+    },
+    {
+      "name": "慢点",
+      "count": 1
+    },
+    {
+      "name": "急什么",
+      "count": 1
+    },
+    {
+      "name": "尊嘟假嘟",
+      "count": 1
+    },
+    {
+      "name": "真的假的",
+      "count": 1
+    },
+    {
+      "name": "惊讶",
+      "count": 1
+    },
+    {
+      "name": "瞪大眼睛",
+      "count": 1
+    },
+    {
+      "name": "呆住",
+      "count": 1
+    },
+    {
+      "name": "我要闹了",
+      "count": 1
+    },
+    {
+      "name": "打滚",
+      "count": 1
+    },
+    {
+      "name": "撒泼",
+      "count": 1
+    },
+    {
+      "name": "闹脾气",
+      "count": 1
+    },
+    {
+      "name": "谢谢老板",
+      "count": 1
+    },
+    {
+      "name": "感谢",
+      "count": 1
+    },
+    {
+      "name": "鞠躬",
+      "count": 1
+    },
+    {
+      "name": "作揖",
+      "count": 1
+    },
+    {
+      "name": "多谢",
+      "count": 1
+    },
+    {
+      "name": "自闭",
+      "count": 1
+    },
+    {
+      "name": "画圈圈",
+      "count": 1
+    },
+    {
+      "name": "面壁",
+      "count": 1
+    },
+    {
+      "name": "角落",
+      "count": 1
+    },
+    {
+      "name": "勿扰",
+      "count": 1
+    },
+    {
+      "name": "这就来",
+      "count": 1
+    },
+    {
+      "name": "马上到",
+      "count": 1
+    },
+    {
+      "name": "在路上",
+      "count": 1
+    },
+    {
+      "name": "小跑",
+      "count": 1
+    },
+    {
+      "name": "已读不回",
+      "count": 1
+    },
+    {
+      "name": "冷漠",
+      "count": 1
+    },
+    {
+      "name": "放下手机",
+      "count": 1
+    },
+    {
+      "name": "沉默",
+      "count": 1
+    },
+    {
+      "name": "已阅",
+      "count": 1
+    },
+    {
+      "name": "吃饱了",
+      "count": 1
+    },
+    {
+      "name": "摸肚子",
+      "count": 1
+    },
+    {
+      "name": "好撑",
+      "count": 1
+    },
+    {
+      "name": "满足",
+      "count": 1
+    },
+    {
+      "name": "干饭完毕",
+      "count": 1
+    },
+    {
+      "name": "不想动",
+      "count": 1
+    },
+    {
+      "name": "瘫倒",
+      "count": 1
+    },
+    {
+      "name": "猫饼",
+      "count": 1
+    },
+    {
+      "name": "懒惰",
+      "count": 1
+    },
+    {
+      "name": "歇着",
+      "count": 1
+    },
+    {
+      "name": "狂暴按头",
+      "count": 1
+    },
+    {
+      "name": "揉头",
+      "count": 1
+    },
+    {
+      "name": "疯狂按头",
+      "count": 1
+    },
+    {
+      "name": "rua",
+      "count": 1
+    },
+    {
+      "name": "赞赏",
+      "count": 1
+    },
+    {
+      "name": "鼓掌",
+      "count": 1
+    },
+    {
+      "name": "啪啪啪",
+      "count": 1
+    },
+    {
+      "name": "精彩",
+      "count": 1
+    },
+    {
+      "name": "厉害",
+      "count": 1
+    },
+    {
+      "name": "启动",
+      "count": 1
+    },
+    {
+      "name": "出发",
+      "count": 1
+    },
+    {
+      "name": "墨镜",
+      "count": 1
+    },
+    {
+      "name": "酷",
+      "count": 1
+    },
+    {
+      "name": "冲冲冲",
+      "count": 1
+    },
+    {
+      "name": "我没意见",
+      "count": 1
+    },
+    {
+      "name": "投降",
+      "count": 1
+    },
+    {
+      "name": "双手赞成",
+      "count": 1
+    },
+    {
+      "name": "随便",
+      "count": 1
+    },
+    {
+      "name": "都行",
+      "count": 1
+    },
+    {
+      "name": "吃土",
+      "count": 1
+    },
+    {
+      "name": "贫穷",
+      "count": 1
+    },
+    {
+      "name": "没钱",
+      "count": 1
+    },
+    {
+      "name": "空空如也",
+      "count": 1
+    },
+    {
+      "name": "钱包空了",
+      "count": 1
+    },
+    {
+      "name": "emo了",
+      "count": 1
+    },
+    {
+      "name": "伤感",
+      "count": 1
+    },
+    {
+      "name": "抑郁",
+      "count": 1
+    },
+    {
+      "name": "下雨",
+      "count": 1
+    },
+    {
+      "name": "这就睡觉",
+      "count": 1
+    },
+    {
+      "name": "钻被窝",
+      "count": 1
+    },
+    {
+      "name": "睡眠",
+      "count": 1
+    },
+    {
+      "name": "呼呼",
+      "count": 1
+    },
+    {
+      "name": "头秃",
+      "count": 1
+    },
+    {
+      "name": "掉毛",
+      "count": 1
+    },
+    {
+      "name": "秃头",
+      "count": 1
+    },
+    {
+      "name": "发愁",
       "count": 1
     }
   ]

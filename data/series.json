@@ -1,6 +1,11 @@
 {
   "series": [
     {
+      "id": "community_caption",
+      "name": "community_caption",
+      "count": 50
+    },
+    {
       "id": "Kakao-Mini.1",
       "name": "Kakao-Mini.1",
       "count": 35
@@ -26,9 +31,9 @@
       "count": 35
     },
     {
-      "id": "community_caption",
-      "name": "community_caption",
-      "count": 30
+      "id": "Kakao-FollowCat",
+      "name": "Kakao-FollowCat",
+      "count": 32
     },
     {
       "id": "community_clean",
@@ -83,6 +88,16 @@
     {
       "id": "Kakao-Vol.10",
       "name": "Kakao-Vol.10",
+      "count": 24
+    },
+    {
+      "id": "Kakao-ShortCat.1",
+      "name": "Kakao-ShortCat.1",
+      "count": 24
+    },
+    {
+      "id": "Kakao-ShortCat.2",
+      "name": "Kakao-ShortCat.2",
       "count": 24
     }
   ]

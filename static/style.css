@@ -152,9 +152,9 @@ a { color: inherit; }
 /* ---------- 棉球小猫 ---------- */
 .hero-cat {
   position: relative;
-  width: min(280px, 72vw);
-  margin-top: 6px;
-  margin-bottom: -26px;
+  width: min(320px, 80vw);
+  margin-top: 8px;
+  margin-bottom: 4px;
 }
 
 .cat-hit {
@@ -169,56 +169,69 @@ a { color: inherit; }
   -webkit-tap-highlight-color: transparent;
 }
 
-.cat { display: block; width: 100%; height: auto; overflow: visible; }
+.cat {
+  --cat-ink: #424442;
+  --cat-cheek: #ffd8e3;
+  --cat-cheek-mark: #ffafc1;
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
 
-.cat-fur, .ear-fill, .paw-fill { fill: #fff; }
-
-.cat-fur, .ear-line, .paw-line {
-  stroke: #4b3a41;
-  stroke-width: 5.5;
+.cat-fill { fill: #fff; }
+.cat-fur {
+  fill: none;
+  stroke: var(--cat-ink);
+  stroke-width: 4.8;
   stroke-linejoin: round;
   stroke-linecap: round;
 }
 
-.cat-fur { fill: #fff; }
-.ear-fill { stroke: none; }
-.ear-line, .paw-line { fill: none; }
-.cat-blush { fill: var(--peach); transition: fill 0.3s; }
-.cat-pupils ellipse, .cat-pupils circle { fill: #4b3a41; }
+.cat-blush { transition: opacity 0.3s; }
+.cat-blush-marks { fill: var(--cat-cheek-mark); opacity: .75; }
+.cat-pupils ellipse, .cat-pupils circle { fill: var(--cat-ink); }
 .cat-pupils .glint { fill: #fff; }
-.paw-toe { fill: none; stroke: #4b3a41; stroke-width: 3.2; stroke-linecap: round; }
 .cat-pupils { transition: transform 0.15s ease-out; }
 
-.eyes-line path, .brows path, .mouth-wave {
+.eye-stroke, .eyes-line path {
   fill: none;
-  stroke: #4b3a41;
-  stroke-width: 4.5;
+  stroke: var(--cat-ink);
+  stroke-width: 4.4;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
 
-.eyes-heart path { fill: #ff7aa2; stroke: #4b3a41; stroke-width: 2.4; }
-.mouth-open { fill: #ff8fa8; stroke: #4b3a41; stroke-width: 3.5; stroke-linejoin: round; }
-.mouth-o { fill: #4b3a41; }
-.cat-tears path { fill: var(--sky); stroke: #4b3a41; stroke-width: 2.4; }
-.fx-sparkle path { fill: var(--butter); stroke: #4b3a41; stroke-width: 2.2; }
-.fx-hearts path { fill: #ff9fbd; stroke: #4b3a41; stroke-width: 2; }
-.fx-zzz text { font-family: var(--font-display); font-size: 22px; fill: #4b3a41; }
-.fx-bang path { stroke: #4b3a41; stroke-width: 7; stroke-linecap: round; }
-.fx-bang circle { fill: #4b3a41; }
+.brows path, .mouth-wave, .mouth-shy {
+  fill: none;
+  stroke: var(--cat-ink);
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.eyes-heart path { fill: #f278a4; stroke: var(--cat-ink); stroke-width: .8; }
+.mouth-open { fill: #ffb1c5; stroke: var(--cat-ink); stroke-width: 1.5; stroke-linejoin: round; }
+.mouth-o { fill: var(--cat-ink); }
+.cat-tears path { fill: #a4e8ff; stroke: #69cbed; stroke-width: 1; }
+.fx-sparkle path { fill: var(--butter); stroke: var(--cat-ink); stroke-width: 2.2; }
+.fx-hearts path { fill: #ff9fbd; stroke: #ec86ab; stroke-width: 1.8; }
+.fx-zzz text { font-family: var(--font-body); font-size: 10px; fill: var(--cat-ink); }
+.fx-bang path { stroke: var(--cat-ink); stroke-width: 2.8; stroke-linecap: round; }
+.fx-bang circle { fill: var(--cat-ink); }
 .fx-anger path { fill: none; stroke: #ff5f7e; stroke-width: 4; stroke-linecap: round; }
+.fx-question path { fill: none; stroke: var(--cat-ink); stroke-width: 2; stroke-linecap: round; }
+.fx-question circle { fill: var(--cat-ink); }
 
 /* 默认全部隐藏，按心情点亮 */
 .eyes, .brows, .mouth, .cat-tears, .fx { display: none; }
 
-.cat-bob, .cat-ear, .eyes, .fx, .cat-tears path {
+.cat-bob, .eyes, .fx, .cat-tears path {
   transform-box: fill-box;
 }
 
-/* 平常：呼吸、眨眼、偶尔抖耳朵 */
+/* 平常只轻轻呼吸和眨眼，保留参考图的短圆耳轮廓。 */
 .cat-bob { transform-origin: 50% 100%; animation: breathe 2.8s ease-in-out infinite; }
-.cat-ear-l { transform-origin: 80% 100%; animation: ear-l 6s ease-in-out infinite; }
-.cat-ear-r { transform-origin: 20% 100%; animation: ear-r 6s ease-in-out 1.3s infinite; }
 .eyes-idle { transform-origin: center; animation: blink 4.6s infinite; }
 
 .cat[data-mood="idle"] .eyes-idle,
@@ -231,7 +244,7 @@ a { color: inherit; }
 
 .cat[data-mood="love"] .eyes-heart,
 .cat[data-mood="love"] .fx-hearts { display: inline; }
-.cat[data-mood="love"] .cat-blush { fill: #ffa3bd; }
+.cat[data-mood="love"] { --cat-cheek: #ffc8db; }
 .cat[data-mood="love"] .cat-bob { animation: sway 0.9s ease-in-out infinite; }
 
 .cat[data-mood="sad"] .eyes-big,
@@ -239,9 +252,6 @@ a { color: inherit; }
 .cat[data-mood="sad"] .mouth-wave,
 .cat[data-mood="sad"] .cat-tears { display: inline; }
 .cat[data-mood="sad"] .cat-bob { animation: sob 0.6s ease-in-out infinite; }
-.cat[data-mood="sad"] .cat-ear { animation: none; transform: rotate(var(--droop)); }
-.cat-ear-l { --droop: -14deg; }
-.cat-ear-r { --droop: 14deg; }
 
 .cat[data-mood="sleepy"] .eyes-closed,
 .cat[data-mood="sleepy"] .fx-zzz { display: inline; }
@@ -252,7 +262,7 @@ a { color: inherit; }
 .cat[data-mood="angry"] .mouth-wave,
 .cat[data-mood="angry"] .fx-anger { display: inline; }
 .cat[data-mood="angry"] .cat-bob { animation: shake 0.16s linear 6; }
-.cat[data-mood="angry"] .cat-blush { fill: #ff9a9a; }
+.cat[data-mood="angry"] { --cat-cheek: #ffc1cc; }
 
 .cat[data-mood="surprised"] .eyes-big,
 .cat[data-mood="surprised"] .mouth-o,
@@ -262,6 +272,21 @@ a { color: inherit; }
 .cat[data-mood="poke"] .eyes-squint,
 .cat[data-mood="poke"] .mouth-open { display: inline; }
 .cat[data-mood="poke"] .cat-bob { animation: squish 0.45s var(--pop); }
+
+.cat[data-mood="wink"] .eyes-wink,
+.cat[data-mood="wink"] .mouth-shy { display: inline; }
+.cat[data-mood="wink"] .cat-bob { animation: sway 1.4s ease-in-out infinite; }
+
+.cat[data-mood="shy"] .eyes-shy,
+.cat[data-mood="shy"] .mouth-shy,
+.cat[data-mood="shy"] .fx-hearts { display: inline; }
+.cat[data-mood="shy"] { --cat-cheek: #ffc1d7; --cat-cheek-mark: #fa97b9; }
+.cat[data-mood="shy"] .cat-bob { animation: breathe 3.2s ease-in-out infinite; }
+
+.cat[data-mood="confused"] .eyes-idle,
+.cat[data-mood="confused"] .mouth-wave,
+.cat[data-mood="confused"] .fx-question { display: inline; }
+.cat[data-mood="confused"] .cat-bob { animation: sway 1.8s ease-in-out infinite; }
 
 .fx-sparkle path, .fx-hearts path { animation: twinkle 1.2s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
 .fx-sparkle path:nth-child(2n), .fx-hearts path:nth-child(2n) { animation-delay: -0.6s; }
@@ -274,26 +299,16 @@ a { color: inherit; }
 
 @keyframes breathe {
   0%, 100% { transform: scale(1, 1); }
-  50% { transform: scale(1.025, 0.975); }
+  50% { transform: scale(1.012, 0.988); }
 }
 @keyframes blink {
   0%, 92%, 100% { transform: scaleY(1); }
   95% { transform: scaleY(0.1); }
 }
-@keyframes ear-l {
-  0%, 88%, 100% { transform: rotate(0); }
-  91% { transform: rotate(-10deg); }
-  94% { transform: rotate(3deg); }
-}
-@keyframes ear-r {
-  0%, 88%, 100% { transform: rotate(0); }
-  91% { transform: rotate(10deg); }
-  94% { transform: rotate(-3deg); }
-}
 @keyframes hop {
   0%, 100% { transform: translateY(0) scale(1, 1); }
   30% { transform: translateY(0) scale(1.08, 0.9); }
-  60% { transform: translateY(-14px) scale(0.95, 1.06); }
+  60% { transform: translateY(-5px) scale(0.98, 1.03); }
 }
 @keyframes sway {
   0%, 100% { transform: rotate(-3deg); }
@@ -310,7 +325,7 @@ a { color: inherit; }
 }
 @keyframes jump {
   0%, 100% { transform: translateY(0); }
-  40% { transform: translateY(-18px) scale(0.96, 1.05); }
+  40% { transform: translateY(-6px) scale(0.98, 1.03); }
 }
 @keyframes squish {
   0%, 100% { transform: scale(1, 1); }
@@ -330,17 +345,6 @@ a { color: inherit; }
   0% { transform: translateY(0) scale(0.6); opacity: 0; }
   20% { opacity: 1; }
   100% { transform: translateY(14px) scale(1); opacity: 0; }
-}
-
-/* 两只爪子扒在搜索框上沿 */
-.cat-paws {
-  position: absolute;
-  z-index: 3;
-  left: 0;
-  bottom: 14px;
-  width: 100%;
-  height: auto;
-  pointer-events: none;
 }
 
 /* 头顶气泡 */
@@ -691,7 +695,6 @@ a { color: inherit; }
 }
 
 .buddy.show { transform: translateY(0); visibility: visible; transition-delay: 0s; }
-.buddy .cat-paws { display: none; }
 .buddy .cat-bubble { left: auto; right: 62%; transform-origin: 100% 100%; }
 .buddy .cat-bubble::after { left: auto; right: 14px; }
 .buddy .gift img { width: 88px; height: 88px; }

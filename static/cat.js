@@ -1,9 +1,9 @@
 /**
  * 棉球小猫吉祥物 (static/cat.js)
  *
- * 按原作比例画的 SVG 小猫：宽扁的圆脑袋、两只小圆耳朵、靠下且分得很开的豆豆眼、大片桃色腮红。
- * 线条用 feTurbulence 逐帧抖动，模仿原作动图那种手绘线条「呼吸」的感觉。
- * 心情：idle / happy / love / sad / sleepy / angry / surprised / poke（被戳的一下）。
+ * 以用户选定的爱心小猫为轮廓参考：短圆耳、宽扁脸、开口的耳间凹口、弯短眼和粉色腮红。
+ * SVG 使用参考图坐标，呼吸和表情动画不改变基础比例。
+ * 心情：idle / happy / love / sad / sleepy / angry / surprised / poke / wink / shy / confused。
  *
  * 用法：
  *   const cat = CottonCat.create(hostEl, { label: '戳一下小猫' });
@@ -15,7 +15,7 @@
 (function () {
   'use strict';
 
-  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const CAT_OUTLINE = 'M86 71 C79 64 71 59 63 59 C52 59 47 68 44 80 C43 83 41 84 39 87 C32 96 30 107 35 119 C41 134 61 141 90 141 C119 141 136 133 142 120 C149 107 147 97 140 87 C136 82 135 78 133 73 C131 64 126 59 119 59 C109 59 102 63 95 71';
   const HEART = 'M0 5 C-9 -1 -7 -10 0 -5 C7 -10 9 -1 0 5 Z';
   const STAR = 'M0 -10 Q2 -2 10 0 Q2 2 0 10 Q-2 2 -10 0 Q-2 -2 0 -10 Z';
   let uid = 0;
@@ -26,7 +26,10 @@
     ['sleepy', ['晚安', '困', '躺平', '发呆', '摸鱼', '睡', '摆烂']],
     ['angry', ['生气', '无语', '哼']],
     ['love', ['贴贴', '比心', '喜欢', '撒娇', '摸摸头', '乖巧', '抱抱']],
-    ['surprised', ['震惊', '疑惑', '暗中观察', '盯', '吃瓜', '偷看']],
+    ['surprised', ['震惊', '暗中观察', '盯', '吃瓜', '偷看']],
+    ['confused', ['疑惑', '懵', '什么', '问号', '不明白', '为什么']],
+    ['wink', ['眨眼', 'wink', '抛媚眼', '调皮', '嘿嘿']],
+    ['shy', ['害羞', '脸红', '不好意思', '捂脸', '娇羞', '羞']],
     ['happy', ['好耶', '点赞', '加油', '打卡', '收到', '干饭', '下班', '开心', '拜拜']]
   ];
 
@@ -37,6 +40,9 @@
     sleepy: ['Zzz…', '困困', '再睡五分钟'],
     angry: ['哼！不给了', '戳太多啦！', '生气气'],
     surprised: ['诶？', '盯——', '发现了！'],
+    confused: ['嗯？', '不懂诶', '问号猫猫'],
+    wink: ['眨给你看～', '嘿嘿', 'wink!'],
+    shy: ['不要看啦', '有点不好意思', '脸红了…'],
     poke: ['喵？送你一张', '这张给你～', '냥! 拿去', '软乎乎的吧', '今天发这个！']
   };
 
@@ -54,82 +60,89 @@
   }
 
   function template(id) {
-    const boil = reduceMotion
-      ? ''
-      : '<animate attributeName="seed" values="1;4;7" dur="0.45s" calcMode="discrete" repeatCount="indefinite"/>';
     return `
 <button type="button" class="cat-hit">
-  <svg class="cat" viewBox="0 0 240 230" data-mood="idle" aria-hidden="true">
+  <svg class="cat" viewBox="24 50 132 100" data-mood="idle" aria-hidden="true">
     <defs>
-      <filter id="cat-boil-${id}" x="-15%" y="-15%" width="130%" height="130%">
-        <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="2" seed="1">${boil}</feTurbulence>
-        <feDisplacementMap in="SourceGraphic" scale="2.4" xChannelSelector="R" yChannelSelector="G"/>
-      </filter>
+      <radialGradient id="cat-cheek-${id}">
+        <stop offset="0" stop-color="var(--cat-cheek)" stop-opacity=".95"/>
+        <stop offset=".90" stop-color="var(--cat-cheek)" stop-opacity=".95"/>
+        <stop offset="1" stop-color="var(--cat-cheek)" stop-opacity="0"/>
+      </radialGradient>
     </defs>
-    <g filter="url(#cat-boil-${id})">
-      <g class="cat-bob">
-        <path class="cat-fur" d="M44 240 C40 214 30 196 26 172 C20 140 30 108 56 90 C76 74 100 68 120 68 C140 68 164 74 184 90 C210 108 220 140 214 172 C210 196 200 214 196 240"/>
-        <g class="cat-ear cat-ear-l">
-          <path class="ear-fill" d="M50 98 C46 74 54 46 70 44 C84 42 94 58 100 72 L104 86 L56 106 Z"/>
-          <path class="ear-line" d="M50 98 C46 74 54 46 70 44 C84 42 94 58 100 72"/>
-        </g>
-        <g class="cat-ear cat-ear-r">
-          <path class="ear-fill" d="M190 98 C194 74 186 46 170 44 C156 42 146 58 140 72 L136 86 L184 106 Z"/>
-          <path class="ear-line" d="M190 98 C194 74 186 46 170 44 C156 42 146 58 140 72"/>
-        </g>
-        <ellipse class="cat-blush" cx="62" cy="146" rx="23" ry="15"/>
-        <ellipse class="cat-blush" cx="178" cy="146" rx="23" ry="15"/>
-        <g class="eyes eyes-idle"><g class="cat-pupils">
-          <ellipse cx="94" cy="132" rx="5.2" ry="6"/><ellipse cx="146" cy="132" rx="5.2" ry="6"/>
-        </g></g>
-        <g class="eyes eyes-big"><g class="cat-pupils">
-          <circle cx="94" cy="130" r="9.5"/><circle cx="146" cy="130" r="9.5"/>
-          <circle class="glint" cx="97.5" cy="126" r="3.4"/><circle class="glint" cx="149.5" cy="126" r="3.4"/>
-          <circle class="glint" cx="90" cy="134" r="1.6"/><circle class="glint" cx="142" cy="134" r="1.6"/>
-        </g></g>
-        <g class="eyes eyes-line eyes-happy"><path d="M85 135 Q94 123 103 135"/><path d="M137 135 Q146 123 155 135"/></g>
-        <g class="eyes eyes-line eyes-closed"><path d="M85 130 Q94 138 103 130"/><path d="M137 130 Q146 138 155 130"/></g>
-        <g class="eyes eyes-line eyes-squint"><path d="M87 124 L101 131 L87 138"/><path d="M153 124 L139 131 L153 138"/></g>
-        <g class="eyes eyes-heart">
-          <path transform="translate(94 132) scale(1.3)" d="${HEART}"/>
-          <path transform="translate(146 132) scale(1.3)" d="${HEART}"/>
-        </g>
-        <g class="brows brows-angry"><path d="M82 114 L103 122"/><path d="M158 114 L137 122"/></g>
-        <g class="brows brows-sad"><path d="M84 120 L102 114"/><path d="M156 120 L138 114"/></g>
-        <path class="mouth mouth-open" d="M113 144 Q120 156 127 144 Z"/>
-        <ellipse class="mouth mouth-o" cx="120" cy="149" rx="4.5" ry="5.5"/>
-        <path class="mouth mouth-wave" d="M111 149 q4.5 -4 9 0 q4.5 4 9 0"/>
-        <g class="cat-tears">
-          <path d="M90 140 C86 150 84 158 90 161 C96 158 94 150 90 140 Z"/>
-          <path d="M150 140 C146 150 144 158 150 161 C156 158 154 150 150 140 Z"/>
+    <g class="cat-bob">
+      <path class="cat-fill" d="${CAT_OUTLINE} Q90 75 86 71Z"/>
+      <path class="cat-fur" d="${CAT_OUTLINE}"/>
+      <g class="cat-cheeks">
+        <ellipse class="cat-blush" cx="56.5" cy="112" rx="17" ry="17.5" fill="url(#cat-cheek-${id})"/>
+        <ellipse class="cat-blush" cx="123" cy="112" rx="17" ry="17.5" fill="url(#cat-cheek-${id})"/>
+        <g class="cat-blush-marks">
+          <ellipse cx="51" cy="113" rx="1.5" ry="3.7" transform="rotate(12 51 113)"/>
+          <ellipse cx="60" cy="114.5" rx="1.4" ry="3.3" transform="rotate(8 60 114.5)"/>
+          <ellipse cx="119" cy="114.5" rx="1.4" ry="3.3" transform="rotate(-8 119 114.5)"/>
+          <ellipse cx="128" cy="113" rx="1.5" ry="3.7" transform="rotate(-12 128 113)"/>
         </g>
       </g>
-      <g class="fx fx-sparkle">
-        <path transform="translate(24 72)" d="${STAR}"/>
-        <path transform="translate(214 58) scale(.8)" d="${STAR}"/>
-        <path transform="translate(228 140) scale(.6)" d="${STAR}"/>
-        <path transform="translate(12 160) scale(.55)" d="${STAR}"/>
+      <g class="eyes eyes-idle"><g class="cat-pupils">
+        <path class="eye-stroke" d="M65.5 106 Q69 103.2 72.5 104.5"/>
+        <path class="eye-stroke" d="M107 104.5 Q110.5 103.2 114 106"/>
+      </g></g>
+      <g class="eyes eyes-big"><g class="cat-pupils">
+        <ellipse cx="69" cy="105" rx="4.8" ry="5.6"/>
+        <ellipse cx="110.5" cy="105" rx="4.8" ry="5.6"/>
+        <circle class="glint" cx="70.2" cy="103" r="1.6"/>
+        <circle class="glint" cx="111.7" cy="103" r="1.6"/>
+        <circle class="glint" cx="67.5" cy="107" r=".7"/>
+        <circle class="glint" cx="109" cy="107" r=".7"/>
+      </g></g>
+      <g class="eyes eyes-line eyes-happy">
+        <path d="M65 106 Q69 100.5 73 106"/><path d="M106.5 106 Q110.5 100.5 114.5 106"/>
       </g>
-      <g class="fx fx-hearts">
-        <path transform="translate(36 56) scale(1.5)" d="${HEART}"/>
-        <path transform="translate(204 44) scale(1.9)" d="${HEART}"/>
-        <path transform="translate(120 34) scale(1.2)" d="${HEART}"/>
+      <g class="eyes eyes-line eyes-closed">
+        <path d="M65 104.5 Q69 109 73 104.5"/><path d="M106.5 104.5 Q110.5 109 114.5 104.5"/>
       </g>
-      <g class="fx fx-zzz"><text x="190" y="62">z</text><text x="206" y="44">z</text><text x="222" y="24">Z</text></g>
-      <g class="fx fx-bang"><path d="M210 18 L203 52"/><circle cx="200" cy="66" r="4"/></g>
-      <g class="fx fx-anger" transform="translate(198 66)">
-        <path d="M-12 -4 Q-4 -4 -4 -12 M4 -12 Q4 -4 12 -4 M12 4 Q4 4 4 12 M-4 12 Q-4 4 -12 4"/>
+      <g class="eyes eyes-line eyes-squint">
+        <path d="M65 101.5 L72 105 L65 108"/><path d="M114.5 101.5 L107.5 105 L114.5 108"/>
+      </g>
+      <g class="eyes eyes-line eyes-wink">
+        <path d="M65 104 Q69 109 73 104"/><path d="M107 104.5 Q110.5 103.2 114 106"/>
+      </g>
+      <g class="eyes eyes-line eyes-shy">
+        <path d="M65.5 106 Q69 103 72.5 104.5"/><path d="M107 104.5 Q110.5 103 114 106"/>
+      </g>
+      <g class="eyes eyes-heart">
+        <path transform="translate(69 106) scale(.55)" d="${HEART}"/>
+        <path transform="translate(110.5 106) scale(.55)" d="${HEART}"/>
+      </g>
+      <g class="brows brows-angry"><path d="M64 98 L73 101"/><path d="M115.5 98 L106.5 101"/></g>
+      <g class="brows brows-sad"><path d="M64 100 L73 97"/><path d="M115.5 100 L106.5 97"/></g>
+      <path class="mouth mouth-open" d="M85.5 116 Q90 126 94.5 116Z"/>
+      <ellipse class="mouth mouth-o" cx="90" cy="119" rx="2" ry="2.7"/>
+      <path class="mouth mouth-wave" d="M84.5 119 q2.7 -2.5 5.5 0 q2.7 2.5 5.5 0"/>
+      <path class="mouth mouth-shy" d="M87 118 Q90 121 93 118"/>
+      <g class="cat-tears">
+        <path d="M65.5 111 C62 118 61 124 64.5 126 C68 124 67 118 65.5 111Z"/>
+        <path d="M114 111 C117.5 118 118.5 124 115 126 C111.5 124 112.5 118 114 111Z"/>
       </g>
     </g>
+    <g class="fx fx-sparkle">
+      <path transform="translate(32 72) scale(.38)" d="${STAR}"/>
+      <path transform="translate(148 67) scale(.32)" d="${STAR}"/>
+      <path transform="translate(153 116) scale(.24)" d="${STAR}"/>
+    </g>
+    <g class="fx fx-hearts">
+      <path transform="translate(35 69) scale(.55)" d="${HEART}"/>
+      <path transform="translate(146 63) scale(.65)" d="${HEART}"/>
+      <path transform="translate(91 56) scale(.35)" d="${HEART}"/>
+    </g>
+    <g class="fx fx-zzz"><text x="137" y="74">z</text><text x="144" y="66">z</text><text x="151" y="58">Z</text></g>
+    <g class="fx fx-bang"><path d="M149 63 L147 73"/><circle cx="146.5" cy="77" r="1.3"/></g>
+    <g class="fx fx-anger" transform="translate(138 78) scale(.34)">
+      <path d="M-13 -4 Q-4 -4 -4 -13 M4 -13 Q4 -4 13 -4 M13 4 Q4 4 4 13 M-4 13 Q-4 4 -13 4"/>
+    </g>
+    <g class="fx fx-question"><path d="M141 66 q0 -5 5 -5 q5 0 5 5 q0 3 -4 5 v2"/><circle cx="147" cy="77" r="1.1"/></g>
   </svg>
 </button>
-<svg class="cat-paws" viewBox="0 0 240 36" aria-hidden="true">
-  <g filter="url(#cat-boil-${id})">
-    <path class="paw-fill" d="M62 36 L62 22 C62 4 104 4 104 22 L104 36 Z M136 36 L136 22 C136 4 178 4 178 22 L178 36 Z"/>
-    <path class="paw-line" d="M62 27 L62 22 C62 4 104 4 104 22 L104 27 M136 27 L136 22 C136 4 178 4 178 22 L178 27"/>
-    <path class="paw-toe" d="M76 11 v8 M90 11 v8 M150 11 v8 M164 11 v8"/>
-  </g>
-</svg>
 <div class="cat-bubble" aria-live="polite"></div>`;
   }
 
@@ -180,9 +193,9 @@
       lookAt(x, y) {
         const rect = svg.getBoundingClientRect();
         const dx = x - (rect.left + rect.width / 2);
-        const dy = y - (rect.top + rect.height * 0.57);
+        const dy = y - (rect.top + rect.height * 0.55);
         const dist = Math.hypot(dx, dy) || 1;
-        const reach = Math.min(dist / 60, 1) * 5;
+        const reach = Math.min(dist / 60, 1) * 1.5;
         const t = `translate(${(dx / dist) * reach}px, ${(dy / dist) * reach}px)`;
         pupils.forEach(p => { p.style.transform = t; });
       }
@@ -195,25 +208,25 @@
   const FAVICON_KEY = 'mianqiu-favicon';
 
   function faviconSvg(mood, bg, blush) {
-    const ink = '#4b3a41';
-    const line = `fill="none" stroke="${ink}" stroke-width="3.4" stroke-linecap="round"`;
+    const ink = '#424442';
+    const line = `fill="none" stroke="${ink}" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round"`;
     const faces = {
-      idle: `<circle cx="24" cy="29" r="3.8" fill="${ink}"/><circle cx="40" cy="29" r="3.8" fill="${ink}"/>`,
-      happy: `<path d="M19 30 Q24 23 29 30" ${line}/><path d="M35 30 Q40 23 45 30" ${line}/><path d="M28 39 Q32 43 36 39" ${line}/>`,
-      squint: `<path d="M19 24.5 L28 29 L19 33.5" ${line}/><path d="M45 24.5 L36 29 L45 33.5" ${line}/><path d="M28 40 Q32 37 36 40" ${line}/>`,
-      sleepy: `<path d="M19 28 Q24 33 29 28" ${line}/><path d="M35 28 Q40 33 45 28" ${line}/>`,
-      love: `<path transform="translate(24 29) scale(.62)" d="${HEART}" fill="${ink}"/><path transform="translate(40 29) scale(.62)" d="${HEART}" fill="${ink}"/><path d="M28 39 Q32 43 36 39" ${line}/>`,
-      surprised: `<circle cx="24" cy="29" r="4.4" fill="${ink}"/><circle cx="40" cy="29" r="4.4" fill="${ink}"/><ellipse cx="32" cy="40" rx="2.8" ry="3.4" fill="${ink}"/>`,
-      angry: `<path d="M18 22 L28 26" ${line}/><path d="M46 22 L36 26" ${line}/><circle cx="24" cy="30" r="3.6" fill="${ink}"/><circle cx="40" cy="30" r="3.6" fill="${ink}"/><path d="M28 40 Q32 37.5 36 40" ${line}/>`
+      idle: `<path d="M65.5 106 Q69 103.2 72.5 104.5 M107 104.5 Q110.5 103.2 114 106" ${line}/>`,
+      happy: `<path d="M65 106 Q69 100.5 73 106 M106.5 106 Q110.5 100.5 114.5 106" ${line}/>`,
+      squint: `<path d="M65 101.5 L72 105 L65 108 M114.5 101.5 L107.5 105 L114.5 108" ${line}/>`,
+      sleepy: `<path d="M65 104.5 Q69 109 73 104.5 M106.5 104.5 Q110.5 109 114.5 104.5" ${line}/>`,
+      love: `<path transform="translate(69 106) scale(.55)" d="${HEART}" fill="${ink}"/><path transform="translate(110.5 106) scale(.55)" d="${HEART}" fill="${ink}"/>`,
+      surprised: `<circle cx="69" cy="105" r="4.8" fill="${ink}"/><circle cx="110.5" cy="105" r="4.8" fill="${ink}"/>`,
+      angry: `<path d="M64 98 L73 101 M115.5 98 L106.5 101" ${line}/><circle cx="69" cy="106" r="3.4" fill="${ink}"/><circle cx="110.5" cy="106" r="3.4" fill="${ink}"/>`
     };
     return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">` +
       `<rect width="64" height="64" rx="16" fill="${bg}"/>` +
-      `<path d="M15 18 L12 5 L27 12 Z" fill="#ffffff" stroke="${ink}" stroke-width="3.4" stroke-linejoin="round"/>` +
-      `<path d="M49 18 L52 5 L37 12 Z" fill="#ffffff" stroke="${ink}" stroke-width="3.4" stroke-linejoin="round"/>` +
-      `<path d="M14 30 C14 15 22 9 32 9 C42 9 50 15 50 30 C50 44 42 51 32 51 C22 51 14 44 14 30 Z" fill="#ffffff" stroke="${ink}" stroke-width="3.4" stroke-linejoin="round"/>` +
-      `<ellipse cx="17" cy="38" rx="5" ry="3.4" fill="${blush}"/>` +
-      `<ellipse cx="47" cy="38" rx="5" ry="3.4" fill="${blush}"/>` +
-      `${faces[mood] || faces.idle}</svg>`;
+      `<svg x="0" y="8" width="64" height="48.5" viewBox="24 50 132 100">` +
+      `<path d="${CAT_OUTLINE} Q90 75 86 71Z" fill="#fff"/>` +
+      `<path d="${CAT_OUTLINE}" fill="none" stroke="${ink}" stroke-width="4.8" stroke-linecap="round" stroke-linejoin="round"/>` +
+      `<ellipse cx="56.5" cy="112" rx="16" ry="16.5" fill="${blush}"/>` +
+      `<ellipse cx="123" cy="112" rx="16" ry="16.5" fill="${blush}"/>` +
+      `${faces[mood]}</svg></svg>`;
   }
 
   function randomFavicon() {
