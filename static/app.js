@@ -21,6 +21,9 @@
     'https://raw.githubusercontent.com/dailiuyi/mianqiu-catHub/main/'
   ];
 
+  // 接入教程里对外给出的正式地址；本地预览时抄到的也是这个域名
+  const API_BASE = 'https://mianhuacat.elma-gohan.xyz';
+
   const BATCH_SIZE = 36;
   const QUICK_SEARCH_COUNT = 12;
   const SLEEP_AFTER_MS = 25000;
@@ -72,6 +75,7 @@
   const batchTray = $('batch-tray');
   const batchDownloadBtn = $('batch-download-btn');
   const batchFormatBtns = document.querySelectorAll('#batch-format .seg-btn');
+  const batchSelectAllBtn = $('batch-select-all');
   const selectedCountEl = $('selected-count');
 
   const lightbox = $('lightbox');
@@ -304,9 +308,10 @@
     if (resultsEmpty) {
       memeGrid.appendChild(createEmptyState());
       loadingText.textContent = '';
-      return;
+    } else {
+      renderNextBatch();
     }
-    renderNextBatch();
+    if (isBatchMode) syncBatchUi();
   }
 
   function createEmptyState() {
@@ -374,7 +379,7 @@
 
     card.addEventListener('click', () => {
       if (isBatchMode) {
-        toggleSelectMeme(meme.id, card);
+        toggleSelectMeme(meme);
       } else {
         openLightbox(meme);
       }
@@ -538,16 +543,40 @@
     });
   }
 
-  // 批量选择切换
-  function toggleSelectMeme(id, cardEl) {
-    const on = !selectedSet.has(id);
-    if (on) selectedSet.add(id);
-    else selectedSet.delete(id);
-    cardEl.classList.toggle('selected', on);
-    cardEl.setAttribute('aria-pressed', String(on));
+  // 批量选择：卡片点选、全选当前筛选结果，都走这里同步界面
+  function syncBatchUi() {
+    const all = filteredMemes.length > 0 && filteredMemes.every(m => selectedSet.has(m.id));
     selectedCountEl.textContent = selectedSet.size;
     batchDownloadBtn.disabled = selectedSet.size === 0;
+    batchSelectAllBtn.textContent = all ? '取消全选' : '全选';
+    batchSelectAllBtn.setAttribute('aria-pressed', String(all));
+
+    memeGrid.querySelectorAll('.sticker').forEach(card => {
+      const meme = cardMeme.get(card);
+      const on = !!meme && selectedSet.has(meme.id);
+      card.classList.toggle('selected', on);
+      if (isBatchMode) card.setAttribute('aria-pressed', String(on));
+    });
+  }
+
+  function toggleSelectMeme(meme) {
+    const on = !selectedSet.has(meme.id);
+    if (on) selectedSet.add(meme.id);
+    else selectedSet.delete(meme.id);
+    syncBatchUi();
     if (on) activeCat().flash('happy', 700);
+  }
+
+  // 全选当前筛选结果（不受已加载张数限制）
+  function toggleSelectAll() {
+    const all = filteredMemes.length > 0 && filteredMemes.every(m => selectedSet.has(m.id));
+    if (all) {
+      filteredMemes.forEach(m => selectedSet.delete(m.id));
+    } else {
+      filteredMemes.forEach(m => selectedSet.add(m.id));
+    }
+    syncBatchUi();
+    activeCat().flash(all ? 'sad' : 'love', 900);
   }
 
   function setBatchMode(on) {
@@ -556,11 +585,7 @@
     batchModeBtn.setAttribute('aria-pressed', String(on));
     batchTray.hidden = !on;
     memeGrid.classList.toggle('is-batch', on);
-    if (!on) {
-      selectedSet.clear();
-      selectedCountEl.textContent = '0';
-      batchDownloadBtn.disabled = true;
-    }
+    if (!on) selectedSet.clear();
     applyFilters();
   }
 
@@ -582,6 +607,7 @@
 
     const CONCURRENCY = 6;
     let index = 0;
+    let done = 0;
 
     async function fetchBlob(path) {
       const resp = await fetch(resolveAssetUrl(path));
@@ -603,6 +629,8 @@
         } catch (e) {
           console.warn('下载单张表情包失败:', item.id, e);
         }
+        done++;
+        batchDownloadBtn.textContent = `正在打包 ${done}/${selectedMemes.length}`;
       }
     }
 
@@ -680,6 +708,58 @@
     });
   }
 
+  // ---------- Bot 接入教程弹窗 ----------
+
+  // 接入示例里的域名跟着当前站点走，本地预览时抄到的就是 localhost
+  function apiSample() {
+    return `import requests
+
+base = "${API_BASE}"
+
+# 随手抽一张动图
+r = requests.get(f"{base}/api/v1/bot/random",
+                 params={"animated": "true"}).json()
+img = requests.get(r["data"]["url"]).content
+
+# 要别的情绪就换词：委屈 / 好耶 / 摸摸头
+r = requests.get(f"{base}/api/v1/bot/search",
+                 params={"q": "贴贴", "limit": 3}).json()
+
+# 发给机器人：OneBot 用 CQ:image，
+# NoneBot 用 MessageSegment.image(url)`;
+  }
+
+  // 给已有 bot 的 Agent 提示词：两行，够了
+  function apiPrompt() {
+    return `要发表情时 GET ${API_BASE}/api/v1/bot/search?q=<情绪词，如委屈/好耶/困了>，
+发返回的 data.items[0].url；没合适的就 GET ${API_BASE}/api/v1/bot/random 随机一张。只读免密钥，一次只发一张。`;
+  }
+
+  async function copyText(text, okText) {
+    try {
+      await navigator.clipboard.writeText(text);
+      showToast(okText);
+    } catch (e) {
+      window.prompt('浏览器不让自动复制，手动抄一下：', text);
+    }
+  }
+
+  function onApiModalClick(e) {
+    const copyBtn = e.target.closest('[data-copy]');
+    if (copyBtn) {
+      const item = copyBtn.closest('[data-path]');
+      copyText(`${API_BASE}${item.dataset.path}`, '地址抄好了，贴给机器人吧');
+      return;
+    }
+    if (e.target.closest('#api-copy-code')) {
+      copyText(apiSample(), '代码抄好了，改改就能跑');
+      return;
+    }
+    if (e.target.closest('#api-copy-prompt')) {
+      copyText(apiPrompt(), '这两行抄好了，贴进系统提示词');
+    }
+  }
+
   function bindEvents() {
     // 搜索输入防抖
     let searchTimer = null;
@@ -709,9 +789,16 @@
     copyLinkBtn.addEventListener('click', copyImageLink);
     copyImgBtn.addEventListener('click', copyImageBlob);
 
-    $('open-api-btn').addEventListener('click', () => apiModal.showModal());
+    $('open-api-btn').addEventListener('click', () => {
+      $('api-sample').textContent = apiSample();
+      $('api-prompt').textContent = apiPrompt();
+      apiModal.showModal();
+    });
     $('api-modal-close').addEventListener('click', () => apiModal.close());
     closeOnBackdrop(apiModal);
+    apiModal.addEventListener('click', onApiModalClick);
+
+    batchSelectAllBtn.addEventListener('click', toggleSelectAll);
 
     // 小猫互动
     heroCat.hit.addEventListener('click', () => pokeCat(heroCat));

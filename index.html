@@ -98,6 +98,7 @@
       <button type="button" class="seg-btn active" data-format="gif" aria-pressed="true">GIF</button>
       <button type="button" class="seg-btn" data-format="raw" aria-pressed="false">原图</button>
     </div>
+    <button type="button" id="batch-select-all" class="chunky-btn" aria-pressed="false">全选</button>
     <button type="button" id="batch-download-btn" class="chunky-btn chunky-btn-primary" disabled>打包下载</button>
   </div>
 
@@ -131,15 +132,90 @@
     <button type="button" class="sheet-close" id="api-modal-close" aria-label="关闭">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7 L17 17 M17 7 L7 17"/></svg>
     </button>
-    <h2 id="api-title">QQ Bot 只读接口</h2>
-    <p>给 OneBot、Lagrange、NoneBot 等第三方机器人用的只读 HTTP 接口，字段只增不减。</p>
-    <ul class="api-list">
-      <li><code><span class="api-method">GET</span>/api/v1/bot/random?tag=&amp;animated=</code><p>随机返回一张表情，可按标签或动静图过滤。</p></li>
-      <li><code><span class="api-method">GET</span>/api/v1/bot/search?q=&amp;limit=10</code><p>关键词检索，支持中文、拼音、韩文原名和图中文字。</p></li>
-      <li><code><span class="api-method">GET</span>/api/v1/bot/emotes/{id}</code><p>单张表情的完整元数据和高清直链。</p></li>
-      <li><code><span class="api-method">GET</span>/api/v1/bot/tags</code><p>库内全部标签及对应数量。</p></li>
-      <li><code><span class="api-method">GET</span>/data/memes.json</code><p>全量静态快照，没有后端时 CDN 或 GitHub Pages 也能直接读。</p></li>
-    </ul>
+    <h2 id="api-title">把小猫接进你的机器人</h2>
+    <p class="api-lead">五个只读接口，不用注册、不用密钥、不限次数。随机要一张，机器人马上就会卖萌。</p>
+
+    <section class="api-block">
+      <h3>三步就通</h3>
+      <ol class="api-steps">
+        <li><b>先摸一摸。</b>把下面任意一个地址粘进浏览器，能看到一坨 JSON，说明小猫在线。</li>
+        <li><b>把图发出去。</b>在机器人里发个 GET，拿到返回里的 <code>data.url</code>，当图片发就行。</li>
+        <li><b>让它挑得更准。</b>想要「早八」就加 <code>tag=早八</code>，只要动图就加 <code>animated=true</code>。</li>
+      </ol>
+    </section>
+
+    <section class="api-block">
+      <h3>小猫的五个口袋</h3>
+      <ul class="api-list">
+        <li data-path="/api/v1/bot/random">
+          <div class="api-head">
+            <span class="api-method">GET</span>
+            <code>/api/v1/bot/random</code>
+            <button type="button" class="api-copy" data-copy>复制地址</button>
+          </div>
+          <p>随手抽一张。可以加 <code>tag</code>（标签）、<code>series</code>（套系）、<code>animated</code>（true 只要动图）收窄范围。</p>
+        </li>
+        <li data-path="/api/v1/bot/search?q=早八">
+          <div class="api-head">
+            <span class="api-method">GET</span>
+            <code>/api/v1/bot/search?q=&amp;limit=10</code>
+            <button type="button" class="api-copy" data-copy>复制地址</button>
+          </div>
+          <p>按关键词找。中文、拼音首字母（<code>tt</code> 就是贴贴）、韩文原名、图上的字都认，<code>limit</code> 最大 50。</p>
+        </li>
+        <li data-path="/api/v1/bot/emotes/kakao-01-01">
+          <div class="api-head">
+            <span class="api-method">GET</span>
+            <code>/api/v1/bot/emotes/{id}</code>
+            <button type="button" class="api-copy" data-copy>复制地址</button>
+          </div>
+          <p>知道 id 就查这一张的完整信息和高清直链，适合塞进自己的收藏夹。</p>
+        </li>
+        <li data-path="/api/v1/bot/tags">
+          <div class="api-head">
+            <span class="api-method">GET</span>
+            <code>/api/v1/bot/tags</code>
+            <button type="button" class="api-copy" data-copy>复制地址</button>
+          </div>
+          <p>所有可用标签和数量，做表情菜单命令时先拉这个，菜单就不会点到空位。</p>
+        </li>
+        <li data-path="/data/memes.json">
+          <div class="api-head">
+            <span class="api-method">GET</span>
+            <code>/data/memes.json</code>
+            <button type="button" class="api-copy" data-copy>复制地址</button>
+          </div>
+          <p>全量静态快照。后端挂了、想离线跑、或者要自己二次加工，都读它。</p>
+        </li>
+      </ul>
+    </section>
+
+    <section class="api-block">
+      <h3>给 Agent 的提示词</h3>
+      <p class="api-hint">给已有的 bot 用的话，把这两行加进它的系统提示词就够了，域名已经填好。</p>
+      <pre class="api-code"><code id="api-prompt"></code></pre>
+      <button type="button" class="chunky-btn" id="api-copy-prompt">抄走这两行</button>
+    </section>
+
+    <section class="api-block">
+      <h3>抄作业</h3>
+      <pre class="api-code"><code id="api-sample"></code></pre>
+      <button type="button" class="chunky-btn" id="api-copy-code">把这段抄走</button>
+    </section>
+
+    <section class="api-block">
+      <h3>小猫碎碎念</h3>
+      <dl class="api-faq">
+        <dt>要密钥吗？</dt>
+        <dd>不要。只读、公开、随便撸，别一秒几百次就行，小猫会累。</dd>
+        <dt>图是 WebP，QQ 发不出去？</dt>
+        <dd>同一张图还有 GIF 版：把 <code>/images/gif/{id}.gif</code> 拼上就能拿，id 用 random 返回的那个。</dd>
+        <dt>接口以后会变吗？</dt>
+        <dd>只会加字段，不会删也不会改已有的。安心接，不用追版本。</dd>
+        <dt>想让机器人按心情回不同的图？</dt>
+        <dd>用 <code>search?q=</code> 搜词就行，比如「委屈」「好耶」「摸摸头」；或者用 <code>random?tag=</code> 每次随机一张。</dd>
+      </dl>
+    </section>
   </dialog>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
