@@ -13,11 +13,12 @@ import logging
 import threading
 from contextlib import asynccontextmanager
 from datetime import date
+from html import escape
 from typing import Optional, List, Dict, Any
 from fastapi import Body, FastAPI, Query, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse, JSONResponse, Response
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, Response
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA_DIR = os.path.join(BASE_DIR, "data")
@@ -28,6 +29,27 @@ STATIC_DIR = os.path.join(BASE_DIR, "static")
 STATS_PATH = os.environ.get("MIANQIU_STATS_PATH") or os.path.join(BASE_DIR, ".state", "stats.json")
 
 logger = logging.getLogger("mianqiu.stats")
+
+# 与 static/app.js 的 SERIES_LABELS 保持一致；详情页在服务端渲染时用
+SERIES_LABELS = {
+    "community_caption": "二创梗图",
+    "community_clean": "高清无字",
+    "Kakao-FollowCat": "跟踪猫",
+    "Kakao-ShortCat.1": "短毛猫1",
+    "Kakao-ShortCat.2": "短毛猫2",
+}
+
+
+def series_label(series: str) -> str:
+    if not series:
+        return "未归类"
+    if series in SERIES_LABELS:
+        return SERIES_LABELS[series]
+    if series.startswith("Kakao-Vol."):
+        return f"第{series.split('.', 1)[1]}弹"
+    if series.startswith("Kakao-Mini."):
+        return f"迷你{series.split('.', 1)[1]}弹"
+    return series
 
 
 def _visitor_hash(visitor: str) -> int:
@@ -240,6 +262,80 @@ def format_meme_item(item: Dict[str, Any], base_url: str) -> Dict[str, Any]:
     }
 
 
+def find_meme(emote_id: str) -> Optional[Dict[str, Any]]:
+    for item in load_memes_data().get("memes", []):
+        if item.get("id") == emote_id:
+            return item
+    return None
+
+
+DETAIL_PAGE = """<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#ff9ccd">
+<title>{page_title} · 棉球小猫表情库</title>
+<link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+<link rel="stylesheet" href="/static/style.css?v=cat-expressions-1">
+</head>
+<body class="detail-page">
+<header class="detail-bar">
+  <a class="detail-back" href="/">← 返回表情库</a>
+  <span class="detail-brand">棉球小猫表情库</span>
+</header>
+<main class="detail">
+{body}
+</main>
+<footer class="detail-foot"><p>个人自用、非商业归档。形象著作权归原作者 쯔니 (zzni) 及 Kakao Corp 所有，喜欢请去 Kakao 商店支持正版。</p></footer>
+</body>
+</html>"""
+
+
+def render_detail_page(item: Optional[Dict[str, Any]], emote_id: str = "") -> str:
+    if item is None:
+        body = (
+            '<section class="detail-info">'
+            "<h1>没有这只棉球</h1>"
+            f"<p>表情库里找不到 id 为 <code>{escape(emote_id)}</code> 的表情。</p>"
+            '<p><a class="detail-back" href="/">← 返回表情库</a></p>'
+            "</section>"
+        )
+        return DETAIL_PAGE.format(page_title="没有这只棉球", body=body)
+
+    title = escape(item.get("title") or "棉球小猫")
+    meta_id = escape(item.get("id") or "", quote=True)
+    raw_url = escape("/" + (item.get("url") or "").lstrip("/"), quote=True)
+    fmt = (item.get("format") or "webp").lower()
+    width = item.get("width") or 0
+    height = item.get("height") or 0
+    animated = " 动图" if item.get("is_animated") else ""
+    ko = item.get("title_ko") or ""
+    ocr = (item.get("ocr_text") or "").strip()
+    tag_html = "".join(f"<span>{escape(t)}</span>" for t in (item.get("tags") or []))
+    ko_html = f'<p class="detail-ko" lang="ko">{escape(ko)}</p>' if ko else ""
+    ocr_html = f"<dt>图中文字</dt><dd>{escape(ocr)}</dd>" if ocr else ""
+
+    body = f"""<figure class="detail-stage"><img src="{raw_url}" alt="{title}" width="{width}" height="{height}"></figure>
+<section class="detail-info">
+  <h1>{title}</h1>
+  {ko_html}
+  <dl class="detail-meta">
+    <dt>套系</dt><dd>{escape(series_label(item.get('series', '')))}</dd>
+    <dt>尺寸</dt><dd>{width} × {height}</dd>
+    <dt>格式</dt><dd>{fmt.upper()}{animated}</dd>
+    {ocr_html}
+  </dl>
+  <div class="tag-list">{tag_html}</div>
+  <div class="detail-actions">
+    <a class="chunky-btn chunky-btn-primary" href="/images/gif/{meta_id}.gif" download="{title}.gif">下载 GIF</a>
+    <a class="chunky-btn" href="{raw_url}" download="{title}.{escape(fmt, quote=True)}">下载原图</a>
+  </div>
+</section>"""
+    return DETAIL_PAGE.format(page_title=title, body=body)
+
+
 # ==================== 第三方 QQ Bot 只读 API ====================
 
 @app.get("/api/v1/bot/random", summary="随机获取表情")
@@ -324,17 +420,22 @@ async def bot_search(
 
 @app.get("/api/v1/bot/emotes/{emote_id}", summary="获取单张表情元数据")
 async def bot_get_emote(request: Request, emote_id: str):
-    memes_data = load_memes_data()
-    items = memes_data.get("memes", [])
-    for it in items:
-        if it.get("id") == emote_id:
-            base_url = str(request.base_url)
-            return {
-                "code": 0,
-                "msg": "ok",
-                "data": format_meme_item(it, base_url),
-            }
-    raise HTTPException(status_code=404, detail="Emote not found")
+    item = find_meme(emote_id)
+    if item is None:
+        raise HTTPException(status_code=404, detail="Emote not found")
+    return {
+        "code": 0,
+        "msg": "ok",
+        "data": format_meme_item(item, str(request.base_url)),
+    }
+
+
+@app.get("/e/{emote_id}", include_in_schema=False)
+async def emote_detail_page(emote_id: str):
+    item = find_meme(emote_id)
+    if item is None:
+        return HTMLResponse(render_detail_page(None, emote_id), status_code=404)
+    return HTMLResponse(render_detail_page(item))
 
 
 @app.get("/api/v1/bot/tags", summary="获取所有标签与数量")

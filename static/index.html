@@ -120,6 +120,7 @@
       </dl>
       <div id="lightbox-tags" class="tag-list"></div>
       <div class="lightbox-actions">
+        <a id="detail-page-btn" class="chunky-btn">网页详情</a>
         <button type="button" id="copy-img-btn" class="chunky-btn">复制图片</button>
         <button type="button" id="copy-link-btn" class="chunky-btn">复制链接</button>
         <a id="download-gif-btn" class="chunky-btn chunky-btn-primary" download>下载 GIF</a>
@@ -144,6 +145,7 @@
             <span class="api-method">GET</span>
             <code>/api/v1/bot/random?tag=&amp;animated=</code>
             <button type="button" class="api-copy" data-copy>复制地址</button>
+            <a class="api-open" target="_blank" rel="noreferrer">打开</a>
           </div>
           <p>随机返回一张表情，支持按标签或是否动图过滤。</p>
         </li>
@@ -152,6 +154,7 @@
             <span class="api-method">GET</span>
             <code>/api/v1/bot/search?q=&amp;limit=10</code>
             <button type="button" class="api-copy" data-copy>复制地址</button>
+            <a class="api-open" target="_blank" rel="noreferrer">打开</a>
           </div>
           <p>关键词全文检索（支持中文、拼音、韩文原名、OCR 文本），<code>limit</code> 默认 10、最大 50。</p>
         </li>
@@ -160,6 +163,7 @@
             <span class="api-method">GET</span>
             <code>/api/v1/bot/emotes/{id}</code>
             <button type="button" class="api-copy" data-copy>复制地址</button>
+            <a class="api-open" target="_blank" rel="noreferrer">打开</a>
           </div>
           <p>获取单张表情详细元数据与高清直链。</p>
         </li>
@@ -168,6 +172,7 @@
             <span class="api-method">GET</span>
             <code>/api/v1/bot/tags</code>
             <button type="button" class="api-copy" data-copy>复制地址</button>
+            <a class="api-open" target="_blank" rel="noreferrer">打开</a>
           </div>
           <p>获取当前库内所有可用标签及表情数量。</p>
         </li>
@@ -176,8 +181,27 @@
             <span class="api-method">GET</span>
             <code>/data/memes.json</code>
             <button type="button" class="api-copy" data-copy>复制地址</button>
+            <a class="api-open" target="_blank" rel="noreferrer">打开</a>
           </div>
           <p>无需后端服务即可由 CDN / GitHub Pages 直连读取的全量静态元数据快照。</p>
+        </li>
+        <li data-path="/e/kakao-01-01">
+          <div class="api-head">
+            <span class="api-method">GET</span>
+            <code>/e/{id}</code>
+            <button type="button" class="api-copy" data-copy>复制地址</button>
+            <a class="api-open" target="_blank" rel="noreferrer">打开</a>
+          </div>
+          <p>表情详情网页：大图、套系、标签和下载按钮都在这一页，可直接分享。</p>
+        </li>
+        <li data-path="/?q=早八">
+          <div class="api-head">
+            <span class="api-method">GET</span>
+            <code>/?q=&amp;series=&amp;tag=</code>
+            <button type="button" class="api-copy" data-copy>复制地址</button>
+            <a class="api-open" target="_blank" rel="noreferrer">打开</a>
+          </div>
+          <p>搜索结果网页：关键词、套系、标签都可写进地址，刷新和分享能还原。</p>
         </li>
       </ul>
     </section>

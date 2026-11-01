@@ -39,6 +39,7 @@
   let activeSeries = 'all';
   let activeSort = 'default';
   let searchQuery = '';
+  let activeTag = '';
 
   let isBatchMode = false;
   let batchFormat = 'gif';
@@ -89,6 +90,7 @@
   const copyImgBtn = $('copy-img-btn');
   const downloadBtn = $('download-btn');
   const downloadGifBtn = $('download-gif-btn');
+  const detailPageBtn = $('detail-page-btn');
 
   const apiModal = $('api-modal');
   const toast = $('toast');
@@ -147,6 +149,7 @@
   async function init() {
     bindEvents();
     loadFooterStats();
+    readUrlState();
     await loadData();
   }
 
@@ -257,11 +260,12 @@
   function setSearch(value) {
     searchInput.value = value;
     searchQuery = value;
+    activeTag = '';
     applyFilters();
   }
 
   function syncSearchUi() {
-    searchClear.hidden = searchQuery === '';
+    searchClear.hidden = searchQuery === '' && !activeTag;
     tagCloud.querySelectorAll('.tag-chip').forEach(c => {
       c.classList.toggle('active', c.textContent === searchQuery.trim());
     });
@@ -281,6 +285,24 @@
     }
   }
 
+  // 地址栏状态：q=搜索词，series=套系，tag=标签
+  function readUrlState() {
+    const params = new URLSearchParams(window.location.search);
+    searchQuery = (params.get('q') || '').trim();
+    searchInput.value = searchQuery;
+    activeSeries = params.get('series') || 'all';
+    activeTag = (params.get('tag') || '').trim();
+  }
+
+  function syncUrlState() {
+    const params = new URLSearchParams();
+    if (searchQuery.trim()) params.set('q', searchQuery.trim());
+    if (activeSeries !== 'all') params.set('series', activeSeries);
+    if (activeTag) params.set('tag', activeTag);
+    const query = params.toString();
+    window.history.replaceState(null, '', query ? `/?${query}` : '/');
+  }
+
   // 筛选与排序核心逻辑
   function applyFilters() {
     const q = searchQuery.trim().toLowerCase();
@@ -289,6 +311,7 @@
       if (activeType === 'animated' && !m.is_animated) return false;
       if (activeType === 'static' && m.is_animated) return false;
       if (activeSeries !== 'all' && m.series !== activeSeries) return false;
+      if (activeTag && !(m.tags || []).includes(activeTag)) return false;
 
       if (q) {
         const fields = [m.title, m.title_ko, m.ocr_text, m.pinyin, m.pinyin_first, ...(m.tags || [])];
@@ -304,7 +327,8 @@
     }
 
     syncSearchUi();
-    statsScopeEl.textContent = activeSeries === 'all' ? '全部套系' : seriesLabel(activeSeries);
+    const scope = activeSeries === 'all' ? '全部套系' : seriesLabel(activeSeries);
+    statsScopeEl.textContent = activeTag ? `${scope} · 标签：${activeTag}` : scope;
     resultsEmpty = filteredMemes.length === 0;
     queryMood = CottonCat.moodOf(searchQuery.trim());
     refreshMood();
@@ -321,6 +345,7 @@
       renderNextBatch();
     }
     if (isBatchMode) syncBatchUi();
+    syncUrlState();
   }
 
   function createEmptyState() {
@@ -536,6 +561,7 @@
     const gifUrl = resolveAssetUrl(gifPath(meme));
     downloadGifBtn.href = gifUrl;
     downloadGifBtn.setAttribute('download', `${meme.title || meme.id}.gif`);
+    detailPageBtn.href = `/e/${meme.id}`;
 
     if (!lightbox.open) lightbox.showModal();
   }
@@ -868,6 +894,10 @@ url = r["data"]["items"][0]["url"]
     $('open-api-btn').addEventListener('click', () => {
       $('api-sample').textContent = apiSample();
       $('api-prompt').textContent = apiPrompt();
+      document.querySelectorAll('#api-modal li[data-path]').forEach(li => {
+        const link = li.querySelector('.api-open');
+        if (link) link.href = `${API_BASE}${li.dataset.path}`;
+      });
       apiModal.showModal();
     });
     $('api-modal-close').addEventListener('click', () => apiModal.close());

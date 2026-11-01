@@ -81,6 +81,21 @@ def test_index_page():
     assert "棉球小猫表情库" in resp.text
 
 
+def test_detail_page_renders_html():
+    resp = client.get("/e/kakao-01-01")
+    assert resp.status_code == 200
+    assert resp.headers["content-type"].startswith("text/html")
+    assert "返回表情库" in resp.text
+    assert '"code": 0' not in resp.text
+
+
+def test_detail_page_unknown_id_returns_html_404():
+    resp = client.get("/e/no-such-emote")
+    assert resp.status_code == 404
+    assert resp.headers["content-type"].startswith("text/html")
+    assert "返回表情库" in resp.text
+
+
 def test_bot_mini_series():
     resp = client.get("/api/v1/bot/random?series=Kakao-Mini.1")
     assert resp.status_code == 200

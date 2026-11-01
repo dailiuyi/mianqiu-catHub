@@ -46,7 +46,7 @@
 
 为方便第三方 QQ 机器人（如基于 OneBot、Lagrange、NoneBot、Mirai 等开发）调用，接口统一返回 JSON 格式，严格遵循以下契约。
 
-生产接口基址为 `https://mianhuacat.elma-gohan.xyz`，不需要密钥。下方 JSON 为结构示例，ID、计数和域名不是实时数据；真实 ID 从查询结果或 `/data/memes.json` 获取，返回的相对图片路径按接口所在站点解析。
+生产接口基址为 `https://mianhuacat.elma-gohan.xyz`，不需要密钥。下文只给可直接打开的地址与字段说明，返回内容以线上实时结果为准；真实 ID 从查询结果或 `/data/memes.json` 获取，返回的相对图片路径按接口所在站点解析。
 
 ### 1. 随机表情
 - **路径**：`GET /api/v1/bot/random`
@@ -54,27 +54,7 @@
   - `series` (string, 可选): 指定系列（如 `Kakao-Vol.1`、`community`）
   - `tag` (string, 可选): 指定标签（如 `可爱`、`早八`、`偷看`）
   - `animated` (bool, 可选): `true` 仅返回动图，`false` 仅返回静图
-- **返回示例** (HTTP 200)：
-  ```json
-  {
-    "code": 0,
-    "msg": "ok",
-    "data": {
-      "id": "mq-01-003",
-      "title": "暗中观察",
-      "title_ko": "빼꼼",
-      "series": "Kakao-Vol.1",
-      "is_animated": true,
-      "format": "gif",
-      "tags": ["偷看", "探头", "可爱", "观察"],
-      "ocr_text": "暗中观察",
-      "width": 360,
-      "height": 360,
-      "url": "https://your-domain.com/images/raw/mq-01-003.gif",
-      "thumb_url": "https://your-domain.com/images/thumbs/mq-01-003.webp"
-    }
-  }
-  ```
+- **直接打开**：`https://mianhuacat.elma-gohan.xyz/api/v1/bot/random` — 返回 `code`、`msg`、`data`，`data` 含 `id`、`title`、`title_ko`、`series`、`is_animated`、`format`、`tags`、`ocr_text`、`width`、`height`、`url`、`thumb_url`。
 
 ### 2. 关键词与标签检索
 - **路径**：`GET /api/v1/bot/search`
@@ -82,52 +62,19 @@
   - `q` (string, 必填): 搜索关键词（支持中文、拼音、韩文、OCR 文本）
   - `limit` (int, 默认 10, 最大 50): 返回数量
   - `offset` (int, 默认 0): 翻页偏移量
-- **返回示例** (HTTP 200)：
-  ```json
-  {
-    "code": 0,
-    "msg": "ok",
-    "data": {
-      "total": 1,
-      "items": [
-        {
-          "id": "mq-01-003",
-          "title": "暗中观察",
-          "title_ko": "빼꼼",
-          "series": "Kakao-Vol.1",
-          "is_animated": true,
-          "format": "gif",
-          "tags": ["偷看", "探头", "可爱"],
-          "url": "https://your-domain.com/images/raw/mq-01-003.gif",
-          "thumb_url": "https://your-domain.com/images/thumbs/mq-01-003.webp"
-        }
-      ]
-    }
-  }
-  ```
+- **直接打开**：`https://mianhuacat.elma-gohan.xyz/api/v1/bot/search?q=早八` — 返回 `code`、`msg`、`data`，`data` 含 `total` 与 `items`；`items` 每项的字段同随机接口。
+- **网页搜索**：`https://mianhuacat.elma-gohan.xyz/?q=早八` — 在浏览器里直接看结果，`series`、`tag` 也可以写进地址。
 
 ### 3. 单个表情详情
-- **路径**：`GET /api/v1/bot/emotes/{id}`
-- **返回示例** (HTTP 200)：单条表情的完整元数据。
+- **网页**：`https://mianhuacat.elma-gohan.xyz/e/kakao-01-01` — 大图、套系、标签与下载按钮都在这一页，可直接分享。
+- **接口**：`https://mianhuacat.elma-gohan.xyz/api/v1/bot/emotes/kakao-01-01` — 返回单条表情的完整元数据，字段同随机接口的 `data`。
 
 ### 4. 所有可用标签与计数
-- **路径**：`GET /api/v1/bot/tags`
-- **返回示例** (HTTP 200)：
-  ```json
-  {
-    "code": 0,
-    "msg": "ok",
-    "data": [
-      { "name": "可爱", "count": 120 },
-      { "name": "早八", "count": 15 },
-      { "name": "打工人", "count": 22 }
-    ]
-  }
-  ```
+- **路径**：`https://mianhuacat.elma-gohan.xyz/api/v1/bot/tags` — 返回 `code`、`msg`、`data`，`data` 是 `name` 与 `count` 组成的数组。
 
 ### 5. 系列与整体统计
-- `GET /api/v1/bot/series`：全部系列及各自数量。
-- `GET /api/v1/bot/summary`：表情总数、动静图数量、系列数、标签数。
+- `https://mianhuacat.elma-gohan.xyz/api/v1/bot/series`：全部系列及各自数量。
+- `https://mianhuacat.elma-gohan.xyz/api/v1/bot/summary`：表情总数、动静图数量、系列数、标签数。
 - 原图位于 `/images/raw/{id}.webp`；本仓库已为当前全部 569 张生成 `/images/gif/{id}.gif`，供不支持 WebP 的客户端使用。素材后缀仍以实际索引为准。
 
 ---
@@ -214,7 +161,7 @@ python -m uvicorn server.app:app --host 127.0.0.1 --port 8000
 
 - 域名：`mianhuacat.elma-gohan.xyz`（2026-11-01 上线，HTTPS，A 记录 → `47.107.95.249`）。
 - 布局：`/opt/mianqiu-cathub/releases/rel-*`（保留最近 3 个）+ `current` 软链；Python venv 在 `/opt/mianqiu-cathub/venv`；systemd 单元 `mianqiu-cathub`，以专用系统用户 `mianqiu` 运行，监听 `127.0.0.1:8093`，沙箱 `ProtectSystem=strict`、`NoNewPrivileges`。
-- nginx：`/etc/nginx/conf.d/mianhuacat.elma-gohan.xyz.conf`，80 → 301 到 443，只放行 `/`、`/static/`、`/data/`、`/images/`、`/api/v1/bot/` 和 `/api/stats*`，其余一律 404（服务端源码、`/docs`、`/openapi.json` 均不暴露）。
+- nginx：`/etc/nginx/conf.d/mianhuacat.elma-gohan.xyz.conf`，80 → 301 到 443，只放行 `/`、`/e/`、`/static/`、`/data/`、`/images/`、`/api/v1/bot/` 和 `/api/stats*`，其余一律 404（服务端源码、`/docs`、`/openapi.json` 均不暴露）。
 - 证书：Let's Encrypt（webroot `/var/www/certbot`），2027-01-30 到期，由服务器上的 `certbot.timer` 自动续期。
 - 发布：`deploy/deploy.sh [user@host]`，健康检查失败自动回滚软链；nginx 配置测试失败则撤掉本站点配置。
 
