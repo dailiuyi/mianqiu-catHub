@@ -205,6 +205,18 @@ python -m server.app --port 8000
 - 证书：Let's Encrypt（webroot `/var/www/certbot`），2027-01-30 到期，由服务器上的 `certbot.timer` 自动续期。
 - 发布：`deploy/deploy.sh [user@host]`，健康检查失败自动回滚软链；nginx 配置测试失败则撤掉本站点配置。
 
+## 📊 真实访问统计（2026-11-01）
+
+页脚那行「小猫已经替机器人跑了 N 趟，页面被翻了 N 次，N 位朋友来过」来自两个真实计数器，不是写死的数字。
+
+- **接口调用量**：`server/app.py` 的 HTTP 中间件只在 `/api/v1/bot/*` 上 +1，排除 CORS 预检和来自 `127.0.0.1` 的请求（部署脚本的健康检查走本机，不会虚增）。
+- **页面浏览量**：没有走 nginx 日志（nginx 直接发静态文件，不经过 Python），而是前端加载后 `POST /api/stats/view` 记一次。不执行 JS 的爬虫和 `curl` 不计入，所以比原始 access log 更接近「真的有人来看过」。
+- **独立访客**：同一次上报夹带浏览器 `localStorage` 里的随机 id，服务端用 SHA-256 前 16 位压成 64 位整数去重；隐私模式拿不到 localStorage 时只记浏览量不记访客。访客 id 数量上限 10 万。
+- **存储**：`/var/lib/mianqiu-cathub/stats.json`（systemd `StateDirectory`，即应用以 `ProtectSystem=strict` 运行也能写），发布、重启、回滚都不清空。内存累计，每 10 秒最多原子落盘一次，进程被强杀最多丢 10 秒；正常 shutdown 会立即落盘。本地开发不设 `MIANQIU_STATS_PATH` 时写到仓库内 `.state/stats.json`（已 gitignore）。
+- **统计范围**：只统计 elma-gohan 这一份生产站。Cloudflare Pages 的 `functions/` 副本各自独立，不共享数字；只支持单 worker，多开会各存一份互相覆盖。
+- **接口**：`GET /api/stats` 返回 `{api_calls, page_views, visitors, since}`，`POST /api/stats/view` 记一次浏览（204）。两个接口自身不计数。
+- **已知局限**：`/api/stats/view` 没有频控，人为刷会给页面浏览量注水；数字按原样展示，不做估算或平滑。
+
 ## 前端视觉（2026-11-01 重构，同日两次调整配色）
 
 - 方向：亮粉渐变。页面底色是从 `#ff9ccd` 到 `#ffe2ef` 的斜向粉色渐变，叠一层白色圆点；表情卡片、按钮、搜索框是深梅色描边、玫粉投影的白色贴纸，主按钮用粉色渐变。深色模式换成深梅紫渐变。配色经过三版：天蓝（否决）→ 淡粉白（用户嫌不够亮）→ 现在这版，颜色变量集中在 `static/style.css` 顶部 `:root`。

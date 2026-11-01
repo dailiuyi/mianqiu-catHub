@@ -23,6 +23,7 @@ env/
 Thumbs.db
 
 # Runtime & Temporary Data
+.state/
 *.log
 temp/
 tmp/

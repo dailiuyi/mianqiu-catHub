@@ -9,6 +9,8 @@ Group=mianqiu
 WorkingDirectory=/opt/mianqiu-cathub/current
 Environment=PYTHONDONTWRITEBYTECODE=1
 Environment=PYTHONUNBUFFERED=1
+Environment=MIANQIU_STATS_PATH=/var/lib/mianqiu-cathub/stats.json
+StateDirectory=mianqiu-cathub
 ExecStart=/opt/mianqiu-cathub/venv/bin/uvicorn server.app:app --host 127.0.0.1 --port 8093 --proxy-headers --forwarded-allow-ips=127.0.0.1
 Restart=on-failure
 RestartSec=3

@@ -138,6 +138,7 @@
 
   async function init() {
     bindEvents();
+    loadFooterStats();
     await loadData();
   }
 
@@ -710,29 +711,29 @@
 
   // ---------- Bot 接入教程弹窗 ----------
 
-  // 接入示例里的域名跟着当前站点走，本地预览时抄到的就是 localhost
+  // Bot 弹窗里的两段可复制文本，域名固定为正式站点
+
   function apiSample() {
     return `import requests
 
 base = "${API_BASE}"
 
-# 随手抽一张动图
+# 随机取一张动图
 r = requests.get(f"{base}/api/v1/bot/random",
                  params={"animated": "true"}).json()
 img = requests.get(r["data"]["url"]).content
 
-# 要别的情绪就换词：委屈 / 好耶 / 摸摸头
+# 按关键词检索，q 可用中文、拼音首字母或图中文字
 r = requests.get(f"{base}/api/v1/bot/search",
                  params={"q": "贴贴", "limit": 3}).json()
+url = r["data"]["items"][0]["url"]
 
-# 发给机器人：OneBot 用 CQ:image，
-# NoneBot 用 MessageSegment.image(url)`;
+# 发送：OneBot 用 CQ:image，NoneBot 用 MessageSegment.image(url)`;
   }
 
-  // 给已有 bot 的 Agent 提示词：两行，够了
   function apiPrompt() {
-    return `要发表情时 GET ${API_BASE}/api/v1/bot/search?q=<情绪词，如委屈/好耶/困了>，
-发返回的 data.items[0].url；没合适的就 GET ${API_BASE}/api/v1/bot/random 随机一张。只读免密钥，一次只发一张。`;
+    return `发表情时请求 ${API_BASE}/api/v1/bot/search?q=<情绪词，如委屈/好耶/困了>，用返回的 data.items[0].url 作为图片地址；
+没有合适结果时请求 ${API_BASE}/api/v1/bot/random 随机取一张。接口只读、无需密钥，每次只发一张。`;
   }
 
   async function copyText(text, okText) {
@@ -758,6 +759,73 @@ r = requests.get(f"{base}/api/v1/bot/search",
     if (e.target.closest('#api-copy-prompt')) {
       copyText(apiPrompt(), '这两行抄好了，贴进系统提示词');
     }
+  }
+
+  // ---------- 页脚真实统计：Bot 接口调用量与页面浏览量 ----------
+  const VISITOR_KEY = 'mianqiu-visitor-id';
+
+  function getVisitorId() {
+    try {
+      let id = localStorage.getItem(VISITOR_KEY);
+      if (!id) {
+        id = (window.crypto && crypto.randomUUID)
+          ? crypto.randomUUID()
+          : `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+        localStorage.setItem(VISITOR_KEY, id);
+      }
+      return id;
+    } catch (e) {
+      // 隐私模式下 localStorage 不可用，只记浏览量，不记访客
+      return '';
+    }
+  }
+
+  function formatCount(n) {
+    return Number(n || 0).toLocaleString('en-US');
+  }
+
+  async function loadFooterStats() {
+    const box = $('footer-stats');
+    const lineEl = $('footer-stats-line');
+    const sinceEl = $('footer-since');
+    if (!box || !lineEl || !sinceEl) return;
+
+    try {
+      await fetch('/api/stats/view', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ visitor: getVisitorId() }),
+        keepalive: true
+      });
+    } catch (e) {
+      return; // 浏览量记不上就整行不显示，别把失败当成没人来
+    }
+
+    let data;
+    try {
+      const res = await fetch('/api/stats');
+      if (!res.ok) return;
+      data = (await res.json()).data;
+    } catch (e) {
+      return;
+    }
+    if (!data) return;
+
+    const api = Number(data.api_calls) || 0;
+    const views = Number(data.page_views) || 0;
+    const visitors = Number(data.visitors) || 0;
+
+    if (api === 0 && visitors <= 1) {
+      lineEl.textContent = '页面刚开张，机器人还没被叫过。';
+    } else if (api === 0) {
+      lineEl.innerHTML = `已经有 <b>${formatCount(visitors)}</b> 位朋友来过，机器人还没开张。`;
+    } else {
+      lineEl.innerHTML = `小猫已经替机器人跑了 <b>${formatCount(api)}</b> 趟，` +
+        `页面被翻了 <b>${formatCount(views)}</b> 次，` +
+        `<b>${formatCount(visitors)}</b> 位朋友来过。`;
+    }
+    sinceEl.textContent = data.since ? `自 ${data.since} 起统计` : '';
+    box.hidden = false;
   }
 
   function bindEvents() {

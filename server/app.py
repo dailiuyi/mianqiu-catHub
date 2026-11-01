@@ -6,22 +6,148 @@
 
 import os
 import json
+import time
 import random
+import hashlib
+import logging
+import threading
+from contextlib import asynccontextmanager
+from datetime import date
 from typing import Optional, List, Dict, Any
-from fastapi import FastAPI, Query, HTTPException, Request
+from fastapi import Body, FastAPI, Query, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, Response
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA_DIR = os.path.join(BASE_DIR, "data")
 IMAGES_DIR = os.path.join(BASE_DIR, "images")
 STATIC_DIR = os.path.join(BASE_DIR, "static")
 
+# 统计数据落盘位置；生产由 systemd 的 StateDirectory 指到 /var/lib/mianqiu-cathub
+STATS_PATH = os.environ.get("MIANQIU_STATS_PATH") or os.path.join(BASE_DIR, ".state", "stats.json")
+
+logger = logging.getLogger("mianqiu.stats")
+
+
+def _visitor_hash(visitor: str) -> int:
+    """把浏览器里的随机访客 id 压成 64 位整数，避免统计文件随访客线性膨胀"""
+    return int(hashlib.sha256(visitor.encode("utf-8")).hexdigest()[:16], 16)
+
+
+class StatsStore:
+    """接口调用量与页面浏览量的进程内计数，定期原子落盘。
+
+    仅适用于单 worker：多进程会各存一份、互相覆盖。
+    """
+
+    FLUSH_INTERVAL = 10.0
+    VISITOR_CAP = 100_000
+
+    def __init__(self, path: str):
+        self._path = path
+        self._lock = threading.Lock()
+        self._loaded = False
+        self._dirty = False
+        self._last_flush = 0.0
+        self._api_calls = 0
+        self._page_views = 0
+        self._visitors: set = set()
+        self._since = ""
+
+    def _load(self) -> None:
+        if self._loaded:
+            return
+        self._loaded = True
+        try:
+            with open(self._path, "r", encoding="utf-8") as f:
+                raw = json.load(f)
+        except FileNotFoundError:
+            self._since = date.today().isoformat()
+            self._dirty = True
+            return
+        except (OSError, ValueError, TypeError):
+            # 文件被写坏就重开，宁可统计归零也不要让 Bot API 起不来
+            logger.warning("stats 文件无法读取，重新开始计数: %s", self._path)
+            self._since = date.today().isoformat()
+            self._dirty = True
+            return
+        self._api_calls = int(raw.get("api_calls", 0))
+        self._page_views = int(raw.get("page_views", 0))
+        self._visitors = set(raw.get("visitors", []))
+        self._since = raw.get("since") or date.today().isoformat()
+
+    def _mark_dirty(self) -> None:
+        self._dirty = True
+        if time.monotonic() - self._last_flush >= self.FLUSH_INTERVAL:
+            self._flush_locked()
+
+    def _flush_locked(self) -> None:
+        if not self._dirty:
+            return
+        payload = {
+            "api_calls": self._api_calls,
+            "page_views": self._page_views,
+            "visitors": sorted(self._visitors),
+            "since": self._since,
+        }
+        try:
+            os.makedirs(os.path.dirname(self._path), exist_ok=True)
+            tmp_path = self._path + ".tmp"
+            with open(tmp_path, "w", encoding="utf-8") as f:
+                json.dump(payload, f, ensure_ascii=False, separators=(",", ":"))
+            os.replace(tmp_path, self._path)
+        except OSError as exc:
+            # 统计写不进去不能拖垮只读接口
+            logger.warning("stats 落盘失败: %s", exc)
+            return
+        self._dirty = False
+        self._last_flush = time.monotonic()
+
+    def add_api_call(self) -> None:
+        with self._lock:
+            self._load()
+            self._api_calls += 1
+            self._mark_dirty()
+
+    def add_page_view(self, visitor: str) -> None:
+        with self._lock:
+            self._load()
+            self._page_views += 1
+            if visitor and len(self._visitors) < self.VISITOR_CAP:
+                self._visitors.add(_visitor_hash(visitor))
+            self._mark_dirty()
+
+    def flush(self) -> None:
+        with self._lock:
+            self._load()
+            self._flush_locked()
+
+    def snapshot(self) -> Dict[str, Any]:
+        with self._lock:
+            self._load()
+            return {
+                "api_calls": self._api_calls,
+                "page_views": self._page_views,
+                "visitors": len(self._visitors),
+                "since": self._since,
+            }
+
+
+STATS = StatsStore(STATS_PATH)
+
+
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    yield
+    STATS.flush()
+
+
 app = FastAPI(
     title="棉球小猫表情库 (mianqiu-catHub) API",
     description="作者：쯔니 (zzni) | 系列：몽실몽실 냥냥이 (棉球小猫) | 第三方 QQ Bot 只读 HTTP 接口",
     version="1.0.0",
+    lifespan=lifespan,
 )
 
 # 允许跨域（方便第三方 Bot 和前端跨域访问）
@@ -32,6 +158,22 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+LOOPBACK_HOSTS = {"127.0.0.1", "::1", "localhost"}
+
+
+@app.middleware("http")
+async def count_bot_api_calls(request: Request, call_next):
+    """统计真实的外部 Bot 接口调用；本机健康检查和 CORS 预检不算"""
+    response = await call_next(request)
+    path = request.url.path
+    if (
+        request.method != "OPTIONS"
+        and path.startswith("/api/v1/bot/")
+        and (request.client is None or request.client.host not in LOOPBACK_HOSTS)
+    ):
+        STATS.add_api_call()
+    return response
 
 
 def load_memes_data() -> Dict[str, Any]:
@@ -219,6 +361,20 @@ async def bot_get_summary():
             "tags_count": len(load_tags_data()),
         },
     }
+
+
+# ==================== 站点真实访问统计 ====================
+
+@app.get("/api/stats", summary="站点真实接口调用与页面浏览")
+async def get_stats():
+    return {"code": 0, "msg": "ok", "data": STATS.snapshot()}
+
+
+@app.post("/api/stats/view", status_code=204, summary="记录一次页面浏览")
+async def record_page_view(payload: Optional[Dict[str, Any]] = Body(default=None)):
+    visitor = str((payload or {}).get("visitor") or "")[:64]
+    STATS.add_page_view(visitor)
+    return Response(status_code=204)
 
 
 # ==================== 静态文件挂载与页面路由 ====================

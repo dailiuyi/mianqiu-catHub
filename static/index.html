@@ -132,28 +132,28 @@
     <button type="button" class="sheet-close" id="api-modal-close" aria-label="关闭">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7 L17 17 M17 7 L7 17"/></svg>
     </button>
-    <h2 id="api-title">把小猫接进你的机器人</h2>
-    <p class="api-lead">五个只读接口，不用注册、不用密钥、不限次数。随机要一张，机器人马上就会卖萌。</p>
+    <h2 id="api-title">第三方 QQ Bot 只读 HTTP 接口</h2>
+    <p class="api-lead">面向 OneBot / Lagrange / NoneBot 等第三方机器人提供只读 HTTP 接口，数据格式向后兼容，字段只增不减。</p>
 
     <section class="api-block">
-      <h3>三步就通</h3>
+      <h3>接入步骤</h3>
       <ol class="api-steps">
-        <li><b>先摸一摸。</b>把下面任意一个地址粘进浏览器，能看到一坨 JSON，说明小猫在线。</li>
-        <li><b>把图发出去。</b>在机器人里发个 GET，拿到返回里的 <code>data.url</code>，当图片发就行。</li>
-        <li><b>让它挑得更准。</b>想要「早八」就加 <code>tag=早八</code>，只要动图就加 <code>animated=true</code>。</li>
+        <li>浏览器打开任意接口地址，返回 JSON 即接口可用。</li>
+        <li>机器人在对话里请求接口，取 <code>data.url</code>（搜索接口取 <code>data.items[0].url</code>）作为图片地址发送。</li>
+        <li>需要收窄范围时加 <code>tag</code>、<code>series</code>、<code>animated</code> 参数。</li>
       </ol>
     </section>
 
     <section class="api-block">
-      <h3>小猫的五个口袋</h3>
+      <h3>接口</h3>
       <ul class="api-list">
         <li data-path="/api/v1/bot/random">
           <div class="api-head">
             <span class="api-method">GET</span>
-            <code>/api/v1/bot/random</code>
+            <code>/api/v1/bot/random?tag=&amp;animated=</code>
             <button type="button" class="api-copy" data-copy>复制地址</button>
           </div>
-          <p>随手抽一张。可以加 <code>tag</code>（标签）、<code>series</code>（套系）、<code>animated</code>（true 只要动图）收窄范围。</p>
+          <p>随机返回一张表情，支持按标签或是否动图过滤。</p>
         </li>
         <li data-path="/api/v1/bot/search?q=早八">
           <div class="api-head">
@@ -161,7 +161,7 @@
             <code>/api/v1/bot/search?q=&amp;limit=10</code>
             <button type="button" class="api-copy" data-copy>复制地址</button>
           </div>
-          <p>按关键词找。中文、拼音首字母（<code>tt</code> 就是贴贴）、韩文原名、图上的字都认，<code>limit</code> 最大 50。</p>
+          <p>关键词全文检索（支持中文、拼音、韩文原名、OCR 文本），<code>limit</code> 默认 10、最大 50。</p>
         </li>
         <li data-path="/api/v1/bot/emotes/kakao-01-01">
           <div class="api-head">
@@ -169,7 +169,7 @@
             <code>/api/v1/bot/emotes/{id}</code>
             <button type="button" class="api-copy" data-copy>复制地址</button>
           </div>
-          <p>知道 id 就查这一张的完整信息和高清直链，适合塞进自己的收藏夹。</p>
+          <p>获取单张表情详细元数据与高清直链。</p>
         </li>
         <li data-path="/api/v1/bot/tags">
           <div class="api-head">
@@ -177,7 +177,7 @@
             <code>/api/v1/bot/tags</code>
             <button type="button" class="api-copy" data-copy>复制地址</button>
           </div>
-          <p>所有可用标签和数量，做表情菜单命令时先拉这个，菜单就不会点到空位。</p>
+          <p>获取当前库内所有可用标签及表情数量。</p>
         </li>
         <li data-path="/data/memes.json">
           <div class="api-head">
@@ -185,35 +185,35 @@
             <code>/data/memes.json</code>
             <button type="button" class="api-copy" data-copy>复制地址</button>
           </div>
-          <p>全量静态快照。后端挂了、想离线跑、或者要自己二次加工，都读它。</p>
+          <p>无需后端服务即可由 CDN / GitHub Pages 直连读取的全量静态元数据快照。</p>
         </li>
       </ul>
     </section>
 
     <section class="api-block">
-      <h3>给 Agent 的提示词</h3>
-      <p class="api-hint">给已有的 bot 用的话，把这两行加进它的系统提示词就够了，域名已经填好。</p>
+      <h3>Agent 提示词</h3>
+      <p class="api-hint">已有 bot 可把下面两行加入系统提示词，接口地址已按正式站点填好。</p>
       <pre class="api-code"><code id="api-prompt"></code></pre>
-      <button type="button" class="chunky-btn" id="api-copy-prompt">抄走这两行</button>
+      <button type="button" class="chunky-btn" id="api-copy-prompt">复制提示词</button>
     </section>
 
     <section class="api-block">
-      <h3>抄作业</h3>
+      <h3>调用示例</h3>
       <pre class="api-code"><code id="api-sample"></code></pre>
-      <button type="button" class="chunky-btn" id="api-copy-code">把这段抄走</button>
+      <button type="button" class="chunky-btn" id="api-copy-code">复制示例</button>
     </section>
 
     <section class="api-block">
-      <h3>小猫碎碎念</h3>
+      <h3>说明</h3>
       <dl class="api-faq">
-        <dt>要密钥吗？</dt>
-        <dd>不要。只读、公开、随便撸，别一秒几百次就行，小猫会累。</dd>
-        <dt>图是 WebP，QQ 发不出去？</dt>
-        <dd>同一张图还有 GIF 版：把 <code>/images/gif/{id}.gif</code> 拼上就能拿，id 用 random 返回的那个。</dd>
-        <dt>接口以后会变吗？</dt>
-        <dd>只会加字段，不会删也不会改已有的。安心接，不用追版本。</dd>
-        <dt>想让机器人按心情回不同的图？</dt>
-        <dd>用 <code>search?q=</code> 搜词就行，比如「委屈」「好耶」「摸摸头」；或者用 <code>random?tag=</code> 每次随机一张。</dd>
+        <dt>是否需要密钥</dt>
+        <dd>不需要。接口只读、公开，正常频率调用即可。</dd>
+        <dt>图片格式</dt>
+        <dd>返回的是原始 WebP 直链；平台不支持时，把 <code>/images/raw/{id}.webp</code> 换成 <code>/images/gif/{id}.gif</code> 取同图的 GIF 版。</dd>
+        <dt>接口稳定性</dt>
+        <dd>字段只增不减，已有的名称和结构不会变更。</dd>
+        <dt>离线使用</dt>
+        <dd>直接读取 <code>/data/memes.json</code> 全量快照，不依赖后端服务。</dd>
       </dl>
     </section>
   </dialog>
@@ -222,7 +222,13 @@
 
   <footer class="footer">
     <svg class="footer-cat" aria-hidden="true"><use href="#cat-face"/></svg>
-    <p>个人自用、非商业归档。形象著作权归原作者 쯔니 (zzni) 及 Kakao Corp 所有，喜欢请去 Kakao 商店支持正版。</p>
+    <div class="footer-main">
+      <p class="footer-stats" id="footer-stats" hidden>
+        <span id="footer-stats-line"></span>
+        <span class="footer-since" id="footer-since"></span>
+      </p>
+      <p>个人自用、非商业归档。形象著作权归原作者 쯔니 (zzni) 及 Kakao Corp 所有，喜欢请去 Kakao 商店支持正版。</p>
+    </div>
   </footer>
 
   <script src="static/cat.js"></script>
