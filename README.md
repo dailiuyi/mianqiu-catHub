@@ -190,3 +190,16 @@ pip install -r requirements.txt
 python -m server.app --port 8000
 ```
 访问 `http://localhost:8000` 即可在浏览器中浏览表情库；第三方 QQ Bot 访问 `http://localhost:8000/api/v1/bot/...` 即可调用只读接口。
+
+---
+
+## 生产部署（elma-gohan 服务器）
+
+- 域名：`mianhuacat.elma-gohan.xyz`（2026-11-01 部署；**DNS A 记录与 HTTPS 证书尚未配置**，见下）。
+- 布局：`/opt/mianqiu-cathub/releases/rel-*`（保留最近 3 个）+ `current` 软链；Python venv 在 `/opt/mianqiu-cathub/venv`；systemd 单元 `mianqiu-cathub`，以专用系统用户 `mianqiu` 运行，监听 `127.0.0.1:8093`，沙箱 `ProtectSystem=strict`、`NoNewPrivileges`。
+- nginx：`/etc/nginx/conf.d/mianhuacat.elma-gohan.xyz.conf` 只放行 `/`、`/static/`、`/data/`、`/images/`、`/api/v1/bot/`，其余一律 404（服务端源码、`/docs`、`/openapi.json` 均不暴露）。
+- 发布：`deploy/deploy.sh [user@host]`，健康检查失败自动回滚软链；nginx 配置测试失败则撤掉本站点配置。
+- 待办（需要你的 DNS 控制台）：
+  1. 添加 A 记录 `mianhuacat` → `47.107.95.249`。
+  2. 生效后在服务器执行 `certbot certonly --webroot -w /var/www/certbot -d mianhuacat.elma-gohan.xyz`，再按 `4dgs.elma-gohan.xyz.conf` 的写法把 80 端口改为 301 跳转并增加 443 server 块。
+- 注意：当前站点仅 HTTP；Bot 调用方拿到的图片 URL 会随 `X-Forwarded-Proto` 生成，HTTPS 上线前返回的是 `http://` 链接。
