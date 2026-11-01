@@ -144,8 +144,9 @@ mianqiu-catHub/
 │   └── routes/             # 接口路由实现
 ├── static/
 │   ├── index.html          # 前端展示单页（根目录 index.html 是它的副本，供 Cloudflare Pages 使用，两者需同步）
-│   ├── app.js              # 无限加载、拼音搜索、套系托盘、CDN 回退与 JSZip 打包
-│   ├── style.css           # 「棉花糖天空 + 贴纸」主题样式，含深色与小屏适配
+│   ├── app.js              # 无限加载、动图按需播放、拼音搜索、套系托盘、小猫互动、CDN 回退与 JSZip 打包
+│   ├── cat.js              # 会动的 SVG 棉球小猫（8 种心情、手绘线条抖动）
+│   ├── style.css           # 「草莓牛奶」粉白贴纸主题样式，含深色与小屏适配
 │   └── fonts/              # ZCOOL 快乐体子集 woff2（OFL 授权，见 ZCOOLKuaiLe-OFL.txt）
 ├── requirements.txt        # Python 依赖
 └── README.md               # 本项目说明文档
@@ -202,12 +203,19 @@ python -m server.app --port 8000
 - 证书：Let's Encrypt（webroot `/var/www/certbot`），2027-01-30 到期，由服务器上的 `certbot.timer` 自动续期。
 - 发布：`deploy/deploy.sh [user@host]`，健康检查失败自动回滚软链；nginx 配置测试失败则撤掉本站点配置。
 
-## 前端视觉（2026-11-01 重构）
+## 前端视觉（2026-11-01 重构，同日改为粉白配色）
 
-- 方向：「棉花糖天空 + 贴纸」。浅天蓝底配白色棉花云，表情卡片、按钮、搜索框都做成粗墨线描边的白色贴纸，和原作的手绘线条呼应；首屏有一只 SVG 小猫趴在搜索框上，眼睛跟着鼠标转，搜不到结果时会哭。
-- 标题字体：ZCOOL 快乐体（Google Fonts，OFL），只保留页面文案和表情标题里出现的 472 个字，子集 woff2 约 43 KB。**新增带新汉字的文案或表情标题后，需要重新生成子集**，否则缺字会回落到系统字体：
+- 方向：「草莓牛奶」。粉白底色配圆点，表情卡片、按钮、搜索框做成深梅色描边、粉色投影的白色贴纸。第一版用的天蓝配色用户觉得不好看，已整体换掉。
+- 吉祥物 `static/cat.js`：按原作比例手绘的 SVG 棉球小猫（宽扁圆脑袋、小圆耳、靠下的豆豆眼、大片桃色腮红），用 `feTurbulence` 让线条逐帧轻微抖动，模仿原作动图的手绘感。有 8 种心情：平常、开心、喜欢、难过、困、生气、惊讶、被戳。
+- 小猫互动（逻辑在 `static/app.js` 的「小猫互动」一节）：
+  - 眼睛跟着鼠标转。鼠标停在某张表情上时，小猫会做出同款心情：先按图中文字和标题里的关键词判断，判断不出来就按表情 id 固定挑开心、喜欢、惊讶中的一种。
+  - 戳一下小猫，它会从当前筛选结果里随机送一张表情，点气泡里的图就打开大图；3 秒内戳 6 下它会生气。
+  - 搜不到结果时小猫哭；25 秒不操作它会睡着，一动就醒。
+  - 首屏小猫滚出视口后，右下角会探出一只小猫伙伴接替上面这些互动。
+- 动图播放：缩略图（`images/thumbs/`）是静态首帧。贴纸进入视口后，前端在后台预载 `images/raw/` 里的原图动图，加载完再替换，避免闪白。代价是流量变大：首屏 36 张原图共约 10 MB（实测文件大小），只用缩略图时约 280 KB；全部 469 张原图共 87 MB。滚到哪里才加载到哪里。如果服务器带宽吃紧，可以改为生成 160–200px 的动态 WebP 缩略图，每张实测约 80–90 KB（抽样 40 张），但需要改 `scripts/image_utils.py` 并重建 `images/thumbs/`，目前没做。
+- 标题字体：ZCOOL 快乐体（Google Fonts，OFL），只保留页面文案、小猫台词和表情标题里出现的 583 个字，子集 woff2 约 55 KB。**新增带新汉字的文案、台词或表情标题后，需要重新生成子集**，否则缺字会回落到系统字体：
   ```bash
-  # 1. 从 static/index.html、static/app.js 和 data/memes.json 的 title/ocr_text 收集字符到 chars.txt
+  # 1. 从 static/index.html、static/app.js、static/cat.js 和 data/memes.json 的 title/ocr_text 收集字符到 chars.txt
   # 2. 用 Google Fonts 的 ZCOOLKuaiLe-Regular.ttf 生成子集
   uv run --with fonttools --with brotli pyftsubset ZCOOLKuaiLe-Regular.ttf \
     --text-file=chars.txt --flavor=woff2 --layout-features='*' \

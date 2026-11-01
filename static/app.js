@@ -3,11 +3,12 @@
  *
  * 特性：
  * 1. 多源 CDN 自动降级回退 (Local -> jsDelivr -> GitHub Raw)
- * 2. 触底无限加载 (分批 36 张，避免一次性渲染全部 DOM)
+ * 2. 触底无限加载 (分批 36 张)；贴纸进入视口后换成原图动图播放
  * 3. 拼音首字母/全拼/中文/韩文/标签/图中文字实时搜索
- * 4. 套系贴纸托盘、动静图与排序筛选
- * 5. 客户端 JSZip 6 并发限流打包下载
- * 6. 原图弹窗与一键剪贴板复制
+ * 4. 套系托盘、动静图与排序筛选
+ * 5. 首屏小猫互动：看向指针、对悬停的表情做出同款心情、戳一下送一张表情、久不操作会睡着；
+ *    首屏滚出视口后由右下角的小猫伙伴接替
+ * 6. 客户端 JSZip 6 并发限流打包下载；原图弹窗与一键剪贴板复制
  */
 
 (function () {
@@ -22,6 +23,10 @@
 
   const BATCH_SIZE = 36;
   const QUICK_SEARCH_COUNT = 12;
+  const SLEEP_AFTER_MS = 25000;
+  const ANGRY_POKES = 6;
+  const ANGRY_WINDOW_MS = 3000;
+  const HOVER_MOODS = ['happy', 'love', 'surprised'];
 
   let allMemes = [];
   let filteredMemes = [];
@@ -35,6 +40,14 @@
   let isBatchMode = false;
   const selectedSet = new Set();
   let currentLightboxMeme = null;
+
+  const cardMeme = new WeakMap();
+  let hoveredCard = null;
+  let pokeTimes = [];
+  let resultsEmpty = false;
+  let queryMood = '';
+  let sleeping = false;
+  let lastActive = Date.now();
 
   const $ = (id) => document.getElementById(id);
 
@@ -51,8 +64,8 @@
   const statsScopeEl = $('stats-scope');
   const typeFilterBtns = document.querySelectorAll('#type-filter .seg-btn');
   const sortFilterBtns = document.querySelectorAll('#sort-filter .seg-btn');
-  const mascot = $('mascot');
-  const mascotPupils = $('mascot-pupils');
+  const heroCatEl = $('hero-cat');
+  const buddyEl = $('buddy');
 
   const batchModeBtn = $('batch-mode-btn');
   const batchTray = $('batch-tray');
@@ -72,6 +85,14 @@
 
   const apiModal = $('api-modal');
   const toast = $('toast');
+
+  const heroCat = CottonCat.create(heroCatEl, { label: '戳一下小猫，送你一张表情' });
+  const buddyCat = CottonCat.create(buddyEl, { label: '戳一下小猫，送你一张表情' });
+
+  // 首屏小猫在视口内就由它互动，否则由右下角伙伴接替
+  function activeCat() {
+    return buddyEl.classList.contains('show') ? buddyCat : heroCat;
+  }
 
   // 套系展示名：Kakao-Vol.3 → 第3弹，Kakao-Mini.2 → 迷你2弹
   const SERIES_LABELS = {
@@ -97,6 +118,15 @@
     if (mini) return 100 + Number(mini[1]);
     if (series.startsWith('community')) return 200;
     return 300;
+  }
+
+  // 表情对应的小猫心情：先看图中文字和标题；官方原版多数没有文字，按 id 固定挑一种
+  function moodFor(meme) {
+    const byText = CottonCat.moodOf(meme.ocr_text) || CottonCat.moodOf(meme.title);
+    if (byText) return byText;
+    let h = 0;
+    for (const ch of meme.id) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+    return HOVER_MOODS[h % HOVER_MOODS.length];
   }
 
   async function init() {
@@ -203,10 +233,7 @@
       chip.type = 'button';
       chip.className = 'tag-chip';
       chip.textContent = word;
-      chip.addEventListener('click', () => {
-        const same = searchQuery === word;
-        setSearch(same ? '' : word);
-      });
+      chip.addEventListener('click', () => setSearch(searchQuery === word ? '' : word));
       tagCloud.appendChild(chip);
     });
   }
@@ -222,6 +249,13 @@
     tagCloud.querySelectorAll('.tag-chip').forEach(c => {
       c.classList.toggle('active', c.textContent === searchQuery.trim());
     });
+  }
+
+  // 持续心情：搜不到 > 睡着 > 搜索词的心情 > 平常
+  function refreshMood() {
+    const mood = resultsEmpty ? 'sad' : sleeping ? 'sleepy' : queryMood || 'idle';
+    heroCat.setMood(mood);
+    buddyCat.setMood(mood);
   }
 
   function shuffle(list) {
@@ -255,13 +289,16 @@
 
     syncSearchUi();
     statsScopeEl.textContent = activeSeries === 'all' ? '全部套系' : seriesLabel(activeSeries);
-    mascot.classList.toggle('is-sad', filteredMemes.length === 0);
+    resultsEmpty = filteredMemes.length === 0;
+    queryMood = CottonCat.moodOf(searchQuery.trim());
+    refreshMood();
 
     memeGrid.replaceChildren();
+    hoveredCard = null;
     displayedCount = 0;
     displayedCountEl.textContent = '0';
 
-    if (filteredMemes.length === 0) {
+    if (resultsEmpty) {
       memeGrid.appendChild(createEmptyState());
       loadingText.textContent = '';
       return;
@@ -297,6 +334,18 @@
       : '再往下翻还有...';
   }
 
+  // 贴纸先显示静态缩略图（首帧），进入视口后预载原图动图，加载完再替换，避免闪白
+  const animateObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+      animateObserver.unobserve(entry.target);
+      const img = entry.target;
+      const preload = new Image();
+      preload.onload = () => { img.src = preload.src; };
+      preload.src = img.dataset.animated;
+    });
+  }, { rootMargin: '200px' });
+
   // 构造单张贴纸
   function createMemeCard(meme) {
     const card = document.createElement('button');
@@ -305,6 +354,7 @@
     card.title = meme.title || '';
     if (selectedSet.has(meme.id)) card.classList.add('selected');
     if (isBatchMode) card.setAttribute('aria-pressed', String(selectedSet.has(meme.id)));
+    cardMeme.set(card, meme);
 
     const thumbRel = meme.thumb_url || meme.url;
     const img = document.createElement('img');
@@ -313,6 +363,10 @@
     img.loading = 'lazy';
     img.decoding = 'async';
     attachImageFallback(img, thumbRel);
+    if (meme.is_animated && meme.thumb_url) {
+      img.dataset.animated = resolveAssetUrl(meme.url);
+      animateObserver.observe(img);
+    }
     card.appendChild(img);
 
     card.addEventListener('click', () => {
@@ -354,16 +408,77 @@
     observer.observe(scrollSentinel);
   }
 
-  // 首屏小猫的眼睛跟着指针转
-  function followPointer(e) {
-    const rect = mascot.getBoundingClientRect();
-    const cx = rect.left + rect.width / 2;
-    const cy = rect.top + rect.height * 0.64;
-    const dx = e.clientX - cx;
-    const dy = e.clientY - cy;
-    const dist = Math.hypot(dx, dy) || 1;
-    const reach = Math.min(dist / 40, 1) * 5;
-    mascotPupils.style.transform = `translate(${(dx / dist) * reach}px, ${(dy / dist) * reach}px)`;
+  // ---------- 小猫互动 ----------
+
+  // 鼠标停在（或键盘聚焦到）一张表情上：小猫看过去，做出同款心情
+  function reactToCard(card) {
+    if (!card || card === hoveredCard) return;
+    hoveredCard = card;
+    const meme = cardMeme.get(card);
+    if (!meme) return;
+    const cat = activeCat();
+    const rect = card.getBoundingClientRect();
+    cat.lookAt(rect.left + rect.width / 2, rect.top + rect.height / 2);
+    cat.flash(moodFor(meme), 1500);
+  }
+
+  // 戳小猫：送一张当前筛选范围内的随机表情；戳太快会生气
+  function pokeCat(cat) {
+    const now = Date.now();
+    pokeTimes = pokeTimes.filter(t => now - t < ANGRY_WINDOW_MS);
+    pokeTimes.push(now);
+    if (pokeTimes.length >= ANGRY_POKES) {
+      pokeTimes = [];
+      cat.flash('angry', 1800);
+      cat.say(CottonCat.phrase('angry'));
+      return;
+    }
+
+    const pool = filteredMemes.length ? filteredMemes : allMemes;
+    if (pool.length === 0) {
+      cat.flash('poke', 500);
+      return;
+    }
+    const meme = pool[Math.floor(Math.random() * pool.length)];
+
+    const gift = document.createElement('button');
+    gift.type = 'button';
+    gift.className = 'gift';
+    gift.setAttribute('aria-label', `打开小猫送的表情：${meme.title || ''}`);
+    const img = document.createElement('img');
+    img.src = resolveAssetUrl(meme.url);
+    img.alt = '';
+    attachImageFallback(img, meme.url);
+    const words = document.createElement('span');
+    words.textContent = CottonCat.phrase('poke');
+    gift.append(img, words);
+    gift.addEventListener('click', () => openLightbox(meme));
+
+    cat.flash('poke', 1600);
+    cat.say(gift, 4200);
+  }
+
+  // 一段时间没操作就睡着，动一下就醒
+  function markActive() {
+    lastActive = Date.now();
+    if (!sleeping) return;
+    sleeping = false;
+    refreshMood();
+    activeCat().flash('surprised', 900);
+  }
+
+  function checkSleep() {
+    if (!sleeping && Date.now() - lastActive > SLEEP_AFTER_MS) {
+      sleeping = true;
+      refreshMood();
+    }
+  }
+
+  function setupBuddy() {
+    const observer = new IntersectionObserver(([entry]) => {
+      buddyEl.classList.toggle('show', !entry.isIntersecting);
+    });
+    observer.observe(heroCatEl);
   }
 
   function showToast(message) {
@@ -397,7 +512,7 @@
     downloadBtn.href = rawUrl;
     downloadBtn.setAttribute('download', `${meme.title || meme.id}.${meme.format || 'gif'}`);
 
-    lightbox.showModal();
+    if (!lightbox.open) lightbox.showModal();
   }
 
   function onLightboxClosed() {
@@ -421,6 +536,7 @@
     cardEl.setAttribute('aria-pressed', String(on));
     selectedCountEl.textContent = selectedSet.size;
     batchDownloadBtn.disabled = selectedSet.size === 0;
+    if (on) activeCat().flash('happy', 700);
   }
 
   function setBatchMode(on) {
@@ -485,6 +601,7 @@
     batchDownloadBtn.disabled = false;
     batchDownloadBtn.textContent = '打包下载';
     showToast(`已打包 ${selectedMemes.length} 张`);
+    activeCat().flash('love', 1600);
   }
 
   // 剪贴板复制图片链接
@@ -576,9 +693,21 @@
     $('api-modal-close').addEventListener('click', () => apiModal.close());
     closeOnBackdrop(apiModal);
 
-    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      window.addEventListener('pointermove', followPointer, { passive: true });
-    }
+    // 小猫互动
+    heroCat.hit.addEventListener('click', () => pokeCat(heroCat));
+    buddyCat.hit.addEventListener('click', () => pokeCat(buddyCat));
+    memeGrid.addEventListener('pointerover', (e) => reactToCard(e.target.closest('.sticker')));
+    memeGrid.addEventListener('focusin', (e) => reactToCard(e.target.closest('.sticker')));
+    memeGrid.addEventListener('pointerleave', () => { hoveredCard = null; });
+    window.addEventListener('pointermove', (e) => {
+      activeCat().lookAt(e.clientX, e.clientY);
+      markActive();
+    }, { passive: true });
+    ['keydown', 'scroll', 'touchstart'].forEach(type => {
+      window.addEventListener(type, markActive, { passive: true });
+    });
+    setInterval(checkSleep, 5000);
+    setupBuddy();
   }
 
   if (document.readyState === 'loading') {

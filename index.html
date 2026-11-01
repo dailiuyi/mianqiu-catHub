@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#dcecff" media="(prefers-color-scheme: light)">
-  <meta name="theme-color" content="#232845" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#fff4f7" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#2b2027" media="(prefers-color-scheme: dark)">
   <title>棉球小猫表情库 (몽실몽실 냥냥이) | mianqiu-catHub</title>
   <link rel="preload" href="static/fonts/zcool-kuaile-subset.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="static/style.css">
@@ -13,12 +13,12 @@
 </head>
 <body>
   <svg width="0" height="0" class="sr-only" aria-hidden="true">
-    <symbol id="cat-face" viewBox="0 0 64 52">
-      <path d="M5 50 C3 33 9 21 18 16 C17 9 19 3 24 3 C28 3 31 7 33 11 C35 10 39 10 41 11 C43 7 46 3 50 3 C55 3 57 9 56 16 C62 21 64 33 60 50 Z" fill="#fff" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/>
-      <ellipse cx="18" cy="37" rx="7" ry="5" fill="#ffc9ae"/>
-      <ellipse cx="47" cy="37" rx="7" ry="5" fill="#ffc9ae"/>
-      <circle cx="25" cy="31" r="2.6" fill="currentColor"/>
-      <circle cx="40" cy="31" r="2.6" fill="currentColor"/>
+    <symbol id="cat-face" viewBox="0 0 64 46">
+      <path d="M8 44 C2 36 2 24 8 18 C9 10 13 4 18 4 C21 4 24 7 26 10 C30 9 34 9 38 10 C40 7 43 4 46 4 C51 4 55 10 56 18 C62 24 62 36 56 44 Z" fill="#fff" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/>
+      <ellipse cx="15" cy="32" rx="6.5" ry="4.5" fill="#ffc8bd"/>
+      <ellipse cx="49" cy="32" rx="6.5" ry="4.5" fill="#ffc8bd"/>
+      <circle cx="24" cy="28" r="2.4" fill="currentColor"/>
+      <circle cx="40" cy="28" r="2.4" fill="currentColor"/>
     </symbol>
   </svg>
 
@@ -36,50 +36,28 @@
     </nav>
   </header>
 
-  <!-- 首屏：探头小猫 + 搜索 -->
+  <!-- 首屏：会动的小猫 + 搜索 -->
   <section class="hero">
     <h1 class="hero-title">今天发哪只棉球？</h1>
     <p class="hero-sub">
-      收录 <b id="hero-total">…</b> 张 몽실몽실 냥냥이 表情。<br>
-      搜「早八」「贴贴」，或者拼音首字母 <kbd>tt</kbd> 都能找到。
+      收录 <b id="hero-total">…</b> 张 몽실몽실 냥냥이 表情。戳一下小猫，它会挑一张送你。
     </p>
 
-    <div class="peek" aria-hidden="true">
-      <svg class="mascot" id="mascot" viewBox="0 0 260 172">
-        <path class="mascot-head" d="M18 174 C14 120 28 78 64 60 C60 40 66 22 80 20 C94 18 104 32 110 44 C122 41 138 41 150 44 C156 32 166 18 180 20 C194 22 200 40 196 60 C232 78 246 120 242 174"/>
-        <ellipse class="mascot-blush" cx="80" cy="128" rx="21" ry="14"/>
-        <ellipse class="mascot-blush" cx="180" cy="128" rx="21" ry="14"/>
-        <g class="mascot-eyes">
-          <g class="mascot-pupils" id="mascot-pupils">
-            <circle cx="106" cy="110" r="7.5"/>
-            <circle cx="154" cy="110" r="7.5"/>
-            <circle class="mascot-glint" cx="108.5" cy="107.5" r="2.2"/>
-            <circle class="mascot-glint" cx="156.5" cy="107.5" r="2.2"/>
-          </g>
-        </g>
-        <g class="mascot-tears">
-          <path d="M100 122 C96 132 94 140 100 143 C106 140 104 132 100 122 Z"/>
-          <path d="M160 122 C156 132 154 140 160 143 C166 140 164 132 160 122 Z"/>
-        </g>
-        <path class="mascot-paw" d="M56 174 C56 150 96 150 96 174"/>
-        <path class="mascot-paw" d="M164 174 C164 150 204 150 204 174"/>
-        <path class="mascot-toe" d="M70 165 v8 M82 165 v8 M178 165 v8 M190 165 v8"/>
-      </svg>
-    </div>
+    <div class="hero-cat" id="hero-cat"></div>
 
     <div class="search-box">
       <svg class="search-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 L20 20"/></svg>
-      <input type="search" id="search-input" placeholder="搜表情、拼音、标签或韩文" autocomplete="off" aria-label="搜索表情">
+      <input type="search" id="search-input" placeholder="搜「贴贴」「早八」，拼音首字母 tt 也行" autocomplete="off" aria-label="搜索表情">
       <button type="button" id="search-clear" class="search-clear" aria-label="清空搜索" hidden>
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7 L17 17 M17 7 L7 17"/></svg>
       </button>
     </div>
 
-    <div class="tag-cloud" id="tag-cloud" aria-label="热门标签"></div>
+    <div class="tag-cloud" id="tag-cloud" aria-label="快捷搜索"></div>
   </section>
 
-  <main class="library">
-    <!-- 表情抽屉：套系标签栏 + 筛选 -->
+  <main class="library" id="library">
+    <!-- 表情托盘：套系封面 + 筛选 -->
     <div class="drawer" id="drawer">
       <div class="series-tabs" id="series-tabs" role="group" aria-label="按套系筛选"></div>
       <div class="drawer-tools">
@@ -98,17 +76,20 @@
     </div>
 
     <p class="stats-line">
-      <span id="stats-scope">全部</span>
+      <span id="stats-scope">全部套系</span>
       <span>已显示 <b id="displayed-count">0</b> / <b id="total-count">0</b> 张</span>
     </p>
 
-    <!-- 表情网格 (触底无限加载) -->
+    <!-- 表情网格 (触底无限加载，进入视口的动图才播放) -->
     <section class="meme-grid" id="meme-grid" aria-label="表情列表"></section>
 
     <div id="scroll-sentinel" class="scroll-sentinel">
       <span id="loading-text" role="status">正在获取表情库索引...</span>
     </div>
   </main>
+
+  <!-- 小猫伙伴：首屏小猫滚出视口后跟到右下角，对鼠标停留的表情做反应 -->
+  <div class="buddy" id="buddy"></div>
 
   <!-- 批量下载托盘 -->
   <div class="batch-tray" id="batch-tray" hidden>
@@ -163,6 +144,7 @@
     <p>个人自用、非商业归档。形象著作权归原作者 쯔니 (zzni) 及 Kakao Corp 所有，喜欢请去 Kakao 商店支持正版。</p>
   </footer>
 
+  <script src="static/cat.js"></script>
   <script src="static/app.js"></script>
 </body>
 </html>
