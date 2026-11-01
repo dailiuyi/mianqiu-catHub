@@ -1,0 +1,15 @@
+[Unit]
+Description=Mianqiu CatHub FastAPI Bot API Service
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/var/www/mianqiu-catHub
+ExecStart=/var/www/mianqiu-catHub/.venv/bin/uvicorn server.app:app --host 127.0.0.1 --port 8000
+Restart=always
+RestartSec=3
+Environment=PYTHONPATH=/var/www/mianqiu-catHub
+
+[Install]
+WantedBy=multi-user.target
