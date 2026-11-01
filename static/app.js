@@ -29,7 +29,7 @@
   const SLEEP_AFTER_MS = 25000;
   const ANGRY_POKES = 6;
   const ANGRY_WINDOW_MS = 3000;
-  const HOVER_MOODS = ['happy', 'love', 'surprised'];
+  const HOVER_MOODS = ['happy', 'love', 'surprised', 'wink', 'shy', 'laughing', 'smug'];
 
   let allMemes = [];
   let filteredMemes = [];
@@ -133,10 +133,12 @@
     return 400;
   }
 
-  // 表情对应的小猫心情：先看图中文字和标题；官方原版多数没有文字，按 id 固定挑一种
+  // 先按图中文字、标题及情绪标签判断；没有情绪信息的原版按 id 固定挑一种。
   function moodFor(meme) {
     const byText = CottonCat.moodOf(meme.ocr_text) || CottonCat.moodOf(meme.title);
     if (byText) return byText;
+    const byTags = CottonCat.moodOf(meme.tags.join(' '));
+    if (byTags) return byTags;
     let h = 0;
     for (const ch of meme.id) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
     return HOVER_MOODS[h % HOVER_MOODS.length];

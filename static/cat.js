@@ -3,7 +3,8 @@
  *
  * 以用户选定的爱心小猫为轮廓参考：短圆耳、宽扁脸、开口的耳间凹口、弯短眼和粉色腮红。
  * SVG 使用参考图坐标，呼吸和表情动画不改变基础比例。
- * 心情：idle / happy / love / sad / sleepy / angry / surprised / poke / wink / shy / confused。
+ * 心情：idle / happy / love / sad / sleepy / angry / surprised / poke / wink / shy / confused，
+ * 以及 laughing / crying / hungry / smug / dizzy / nervous。
  *
  * 用法：
  *   const cat = CottonCat.create(hostEl, { label: '戳一下小猫' });
@@ -20,17 +21,23 @@
   const STAR = 'M0 -10 Q2 -2 10 0 Q2 2 0 10 Q-2 2 -10 0 Q-2 -2 0 -10 Z';
   let uid = 0;
 
-  // 关键词 → 心情。只看图中文字和标题，「可爱」这类每张都有的标签没有区分度
+  // 优先匹配具体情绪；“可爱”等通用标签不作为触发词。
   const MOOD_WORDS = [
-    ['sad', ['委屈', '大哭', '心碎', '救救我', '哭', '痛苦', '不想上班', '早八', '挣扎']],
+    ['laughing', ['哈哈', '大笑', '笑死', '笑哭', '嘿嘿']],
+    ['crying', ['大哭', '哭哭', '泪崩', '嚎啕', '暴风哭泣']],
+    ['nervous', ['紧张', '尴尬', '流汗', '心虚', '害怕', '慌张', '发愁', '着急']],
+    ['dizzy', ['头晕', '晕', '转圈', '迷糊', '头疼']],
+    ['hungry', ['饿', '馋', '干饭', '好吃', '吃饭', '开饭', '真香']],
+    ['smug', ['得意', '臭美', '墨镜', '酷', '自信', '哼哼']],
+    ['sad', ['委屈', '心碎', '救救我', '哭', '痛苦', '不想上班', '早八', '挣扎']],
     ['sleepy', ['晚安', '困', '躺平', '发呆', '摸鱼', '睡', '摆烂']],
     ['angry', ['生气', '无语', '哼']],
     ['love', ['贴贴', '比心', '喜欢', '撒娇', '摸摸头', '乖巧', '抱抱']],
     ['surprised', ['震惊', '暗中观察', '盯', '吃瓜', '偷看']],
     ['confused', ['疑惑', '懵', '什么', '问号', '不明白', '为什么']],
-    ['wink', ['眨眼', 'wink', '抛媚眼', '调皮', '嘿嘿']],
+    ['wink', ['眨眼', 'wink', '抛媚眼', '调皮']],
     ['shy', ['害羞', '脸红', '不好意思', '捂脸', '娇羞', '羞']],
-    ['happy', ['好耶', '点赞', '加油', '打卡', '收到', '干饭', '下班', '开心', '拜拜']]
+    ['happy', ['好耶', '点赞', '加油', '打卡', '收到', '下班', '开心', '拜拜']]
   ];
 
   const PHRASES = {
@@ -43,6 +50,12 @@
     confused: ['嗯？', '不懂诶', '问号猫猫'],
     wink: ['眨给你看～', '嘿嘿', 'wink!'],
     shy: ['不要看啦', '有点不好意思', '脸红了…'],
+    laughing: ['哈哈哈哈', '笑到打滚', '停不下来了'],
+    crying: ['呜哇——', '眼泪止不住了', '快抱抱我'],
+    hungry: ['开饭了吗', '好香呀', '想吃一口'],
+    smug: ['我可真厉害', '嘿嘿，拿下', '这题我会'],
+    dizzy: ['转不动了', '脑袋晕乎乎', '让我缓一缓'],
+    nervous: ['有点紧张', '我先擦擦汗', '别盯着我看'],
     poke: ['喵？送你一张', '这张给你～', '냥! 拿去', '软乎乎的吧', '今天发这个！']
   };
 
@@ -105,24 +118,62 @@
         <path d="M65 101.5 L72 105 L65 108"/><path d="M114.5 101.5 L107.5 105 L114.5 108"/>
       </g>
       <g class="eyes eyes-line eyes-wink">
-        <path d="M65 104 Q69 109 73 104"/><path d="M107 104.5 Q110.5 103.2 114 106"/>
+        <path d="M65 104 Q69 109 73 104"/><ellipse class="cat-dot" cx="110.5" cy="105" rx="2.4" ry="3"/>
       </g>
       <g class="eyes eyes-line eyes-shy">
         <path d="M65.5 106 Q69 103 72.5 104.5"/><path d="M107 104.5 Q110.5 103 114 106"/>
       </g>
+      <g class="eyes eyes-line eyes-laughing">
+        <path d="M64.5 106 Q69 97.5 73.5 106"/><path d="M106 106 Q110.5 97.5 115 106"/>
+      </g>
+      <g class="eyes eyes-half">
+        <g class="cat-pupils"><path d="M69 106 v2.7"/><path d="M111 106 v2.7"/></g>
+        <path class="eye-stroke" d="M64 103.5 h10"/><path class="eye-stroke" d="M106 102 h10"/>
+      </g>
+      <g class="eyes eyes-dizzy">
+        <path d="M69 105 c0 -1.6 -2.5 -2 -3.5 0 c-1.7 3.4 3.5 5.6 5.8 2.6 c3.6 -4.6 -2 -10 -6.6 -6.8"/>
+        <path d="M111 105 c0 -1.6 -2.5 -2 -3.5 0 c-1.7 3.4 3.5 5.6 5.8 2.6 c3.6 -4.6 -2 -10 -6.6 -6.8"/>
+      </g>
+      <g class="eyes eyes-nervous"><g class="cat-pupils">
+        <ellipse cx="69" cy="106" rx="1.8" ry="2.8"/><ellipse cx="110.5" cy="106" rx="1.8" ry="2.8"/>
+      </g></g>
+      <g class="eyes eyes-curious"><g class="cat-pupils">
+        <ellipse cx="69" cy="106" rx="2.3" ry="2.8"/><ellipse cx="110.5" cy="103.5" rx="2.3" ry="2.8"/>
+      </g></g>
       <g class="eyes eyes-heart">
         <path transform="translate(69 106) scale(.55)" d="${HEART}"/>
         <path transform="translate(110.5 106) scale(.55)" d="${HEART}"/>
       </g>
       <g class="brows brows-angry"><path d="M64 98 L73 101"/><path d="M115.5 98 L106.5 101"/></g>
       <g class="brows brows-sad"><path d="M64 100 L73 97"/><path d="M115.5 100 L106.5 97"/></g>
+      <g class="brows brows-curious"><path d="M106.5 97 Q110.5 94.5 114.5 97"/></g>
       <path class="mouth mouth-open" d="M85.5 116 Q90 126 94.5 116Z"/>
       <ellipse class="mouth mouth-o" cx="90" cy="119" rx="2" ry="2.7"/>
       <path class="mouth mouth-wave" d="M84.5 119 q2.7 -2.5 5.5 0 q2.7 2.5 5.5 0"/>
       <path class="mouth mouth-shy" d="M87 118 Q90 121 93 118"/>
+      <path class="mouth mouth-laughing" d="M82 115.5 Q90 120 98 115.5 C98 127 82 127 82 115.5Z"/>
+      <path class="mouth mouth-crying" d="M84 123 Q90 112 96 123 Q90 120 84 123Z"/>
+      <path class="mouth mouth-smirk" d="M85 119 Q91 122 96 115.5"/>
+      <path class="mouth mouth-flat" d="M86 119 h8"/>
+      <g class="mouth mouth-lick">
+        <path class="mouth-lip" d="M84.5 117 Q90 121 95.5 117"/>
+        <path class="cat-tongue" d="M90 119 C94 111 100 113 97 118 C96 121 92 122 90 119Z"/>
+      </g>
+      <g class="cat-paws-shy">
+        <path d="M72 128 C69 124 71 118 75 118 C80 117 82 121 80 127"/>
+        <path d="M107 128 C110 124 108 118 104 118 C99 117 97 121 99 127"/>
+        <path class="cat-paw-toes" d="M74 121 l.5 2 M77 121 l.5 2 M105 121 l-.5 2 M102 121 l-.5 2"/>
+      </g>
       <g class="cat-tears">
         <path d="M65.5 111 C62 118 61 124 64.5 126 C68 124 67 118 65.5 111Z"/>
         <path d="M114 111 C117.5 118 118.5 124 115 126 C111.5 124 112.5 118 114 111Z"/>
+      </g>
+      <g class="cat-tear-streams">
+        <path d="M65 110 Q62 120 61.5 131 Q64.5 134 68 131 L70 111Z"/>
+        <path d="M114.5 110 Q117.5 120 118 131 Q115 134 111.5 131 L109.5 111Z"/>
+        <path class="tear-highlight" d="M66 114 L64 128 M113.5 114 L115.5 128"/>
+        <ellipse class="tear-drop" cx="63.5" cy="136" rx="2" ry="1.3"/>
+        <ellipse class="tear-drop" cx="116" cy="136" rx="2" ry="1.3"/>
       </g>
     </g>
     <g class="fx fx-sparkle">
@@ -141,6 +192,17 @@
       <path d="M-13 -4 Q-4 -4 -4 -13 M4 -13 Q4 -4 13 -4 M13 4 Q4 4 4 13 M-4 13 Q-4 4 -13 4"/>
     </g>
     <g class="fx fx-question"><path d="M141 66 q0 -5 5 -5 q5 0 5 5 q0 3 -4 5 v2"/><circle cx="147" cy="77" r="1.1"/></g>
+    <g class="fx fx-sweat">
+      <path d="M135 82 C132 88 130 92 133 94 C137 96 139 92 137 88Z"/>
+      <path class="sweat-glint" d="M134 86 l-1 4"/>
+    </g>
+    <g class="fx fx-drool"><path d="M99 119 C98 123 98 126 100 126.5 C103 126.5 101.5 122 99 119Z"/></g>
+    <g class="fx fx-dizzy-stars">
+      <path class="dizzy-orbit" d="M64 63 Q90 51 116 63"/>
+      <path transform="translate(68 59) scale(.28)" d="${STAR}"/>
+      <path transform="translate(92 55) scale(.32)" d="${STAR}"/>
+      <path transform="translate(114 61) scale(.23)" d="${STAR}"/>
+    </g>
   </svg>
 </button>
 <div class="cat-bubble" aria-live="polite"></div>`;
