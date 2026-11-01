@@ -6,8 +6,8 @@
 
 import os
 import json
-import time
 import random
+import asyncio
 import hashlib
 import logging
 import threading
@@ -49,7 +49,6 @@ class StatsStore:
         self._lock = threading.Lock()
         self._loaded = False
         self._dirty = False
-        self._last_flush = 0.0
         self._api_calls = 0
         self._page_views = 0
         self._visitors: set = set()
@@ -79,8 +78,6 @@ class StatsStore:
 
     def _mark_dirty(self) -> None:
         self._dirty = True
-        if time.monotonic() - self._last_flush >= self.FLUSH_INTERVAL:
-            self._flush_locked()
 
     def _flush_locked(self) -> None:
         if not self._dirty:
@@ -102,7 +99,6 @@ class StatsStore:
             logger.warning("stats 落盘失败: %s", exc)
             return
         self._dirty = False
-        self._last_flush = time.monotonic()
 
     def add_api_call(self) -> None:
         with self._lock:
@@ -137,10 +133,20 @@ class StatsStore:
 STATS = StatsStore(STATS_PATH)
 
 
+async def _flush_stats_periodically() -> None:
+    while True:
+        await asyncio.sleep(StatsStore.FLUSH_INTERVAL)
+        STATS.flush()
+
+
 @asynccontextmanager
 async def lifespan(_: FastAPI):
-    yield
-    STATS.flush()
+    task = asyncio.create_task(_flush_stats_periodically())
+    try:
+        yield
+    finally:
+        task.cancel()
+        STATS.flush()
 
 
 app = FastAPI(
