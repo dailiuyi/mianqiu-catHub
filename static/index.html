@@ -143,11 +143,11 @@
         <li data-path="/api/v1/bot/random">
           <div class="api-head">
             <span class="api-method">GET</span>
-            <code>/api/v1/bot/random?tag=&amp;animated=</code>
+            <code>/api/v1/bot/random?series=&amp;tag=&amp;animated=</code>
             <button type="button" class="api-copy" data-copy>复制地址</button>
             <a class="api-open" target="_blank" rel="noreferrer">打开</a>
           </div>
-          <p>随机返回一张表情，支持按标签或是否动图过滤。</p>
+          <p>随机返回一张表情，支持按套系、标签或是否动图过滤；没有匹配结果时仍返回 HTTP 200，响应体为 <code>code=404</code>、<code>data=null</code>。</p>
         </li>
         <li data-path="/api/v1/bot/search?q=早八">
           <div class="api-head">
@@ -156,7 +156,7 @@
             <button type="button" class="api-copy" data-copy>复制地址</button>
             <a class="api-open" target="_blank" rel="noreferrer">打开</a>
           </div>
-          <p>关键词全文检索（支持中文、拼音、韩文原名、OCR 文本），<code>limit</code> 默认 10、最大 50。</p>
+          <p>关键词全文检索（支持中文、拼音、韩文原名、OCR 文本），<code>limit</code> 默认 10、最大 50，<code>offset</code> 翻页；只认这三个参数，多传的 <code>tag</code>、<code>animated</code>、<code>series</code> 会被忽略。空结果仍是 <code>code=0</code>。</p>
         </li>
         <li data-path="/api/v1/bot/emotes/kakao-01-01">
           <div class="api-head">
@@ -165,7 +165,7 @@
             <button type="button" class="api-copy" data-copy>复制地址</button>
             <a class="api-open" target="_blank" rel="noreferrer">打开</a>
           </div>
-          <p>获取单张表情详细元数据与高清直链。</p>
+          <p>获取单张表情详细元数据与高清直链；id 不存在时返回 404 与 <code>{"detail":"Emote not found"}</code>。WebP 不被客户端支持时，可用 <code>/images/gif/{id}.gif</code> 取同一张的 GIF 版。</p>
         </li>
         <li data-path="/api/v1/bot/tags">
           <div class="api-head">
@@ -175,6 +175,15 @@
             <a class="api-open" target="_blank" rel="noreferrer">打开</a>
           </div>
           <p>获取当前库内所有可用标签及表情数量。</p>
+        </li>
+        <li data-path="/api/v1/bot/series">
+          <div class="api-head">
+            <span class="api-method">GET</span>
+            <code>/api/v1/bot/series</code>
+            <button type="button" class="api-copy" data-copy>复制地址</button>
+            <a class="api-open" target="_blank" rel="noreferrer">打开</a>
+          </div>
+          <p>获取全部套系及数量；返回的 <code>id</code> 可直接用作随机接口的 <code>series</code> 参数。</p>
         </li>
         <li data-path="/data/memes.json">
           <div class="api-head">
@@ -225,7 +234,7 @@
         <dt>是否需要密钥</dt>
         <dd>不需要。接口只读、公开，正常频率调用即可。</dd>
         <dt>图片格式</dt>
-        <dd>返回的是原始 WebP 直链；平台不支持时，把 <code>/images/raw/{id}.webp</code> 换成 <code>/images/gif/{id}.gif</code> 取同图的 GIF 版。</dd>
+        <dd>原图格式以接口返回的 <code>format</code> 为准，下载请直接使用 <code>url</code>；需要 GIF 时，按 <code>id</code> 拼接 <code>/images/gif/{id}.gif</code>，不要固定原图后缀。</dd>
         <dt>接口稳定性</dt>
         <dd>字段只增不减，已有的名称和结构不会变更。</dd>
         <dt>离线使用</dt>

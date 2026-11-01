@@ -55,6 +55,7 @@
   - `tag` (string, 可选): 指定标签（如 `可爱`、`早八`、`偷看`）
   - `animated` (bool, 可选): `true` 仅返回动图，`false` 仅返回静图
 - **直接打开**：`https://mianhuacat.elma-gohan.xyz/api/v1/bot/random` — 返回 `code`、`msg`、`data`，`data` 含 `id`、`title`、`title_ko`、`series`、`is_animated`、`format`、`tags`、`ocr_text`、`width`、`height`、`url`、`thumb_url`。
+- **无匹配**：HTTP 200，响应体为 `{"code":404,"msg":"未找到符合过滤条件的表情","data":null}`。
 
 ### 2. 关键词与标签检索
 - **路径**：`GET /api/v1/bot/search`
@@ -63,11 +64,12 @@
   - `limit` (int, 默认 10, 最大 50): 返回数量
   - `offset` (int, 默认 0): 翻页偏移量
 - **直接打开**：`https://mianhuacat.elma-gohan.xyz/api/v1/bot/search?q=早八` — 返回 `code`、`msg`、`data`，`data` 含 `total` 与 `items`；`items` 每项的字段同随机接口。
+- **只认 `q`、`limit`、`offset`**：多传的 `tag`、`animated`、`series` 会被静默忽略；空结果仍是 `code=0`、`items=[]`。
 - **网页搜索**：`https://mianhuacat.elma-gohan.xyz/?q=早八` — 在浏览器里直接看结果，`series`、`tag` 也可以写进地址。
 
 ### 3. 单个表情详情
 - **网页**：`https://mianhuacat.elma-gohan.xyz/e/kakao-01-01` — 大图、套系、标签与下载按钮都在这一页，可直接分享。
-- **接口**：`https://mianhuacat.elma-gohan.xyz/api/v1/bot/emotes/kakao-01-01` — 返回单条表情的完整元数据，字段同随机接口的 `data`。
+- **接口**：`https://mianhuacat.elma-gohan.xyz/api/v1/bot/emotes/kakao-01-01` — 返回单条表情的完整元数据，字段同随机接口的 `data`；id 不存在时返回 HTTP 404 与 `{"detail":"Emote not found"}`，没有 `code` 信封。
 
 ### 4. 所有可用标签与计数
 - **路径**：`https://mianhuacat.elma-gohan.xyz/api/v1/bot/tags` — 返回 `code`、`msg`、`data`，`data` 是 `name` 与 `count` 组成的数组。
@@ -75,7 +77,19 @@
 ### 5. 系列与整体统计
 - `https://mianhuacat.elma-gohan.xyz/api/v1/bot/series`：全部系列及各自数量。
 - `https://mianhuacat.elma-gohan.xyz/api/v1/bot/summary`：表情总数、动静图数量、系列数、标签数。
-- 原图位于 `/images/raw/{id}.webp`；本仓库已为当前全部 569 张生成 `/images/gif/{id}.gif`，供不支持 WebP 的客户端使用。素材后缀仍以实际索引为准。
+- 原图位于 `/images/raw/{id}.*`；本仓库已为当前全部 569 张生成 `/images/gif/{id}.gif`，供不支持 WebP 的客户端使用。QQ 官方通道不收 WebP 时，直接改用这个 GIF 地址。素材后缀以实际索引为准。
+
+### 6. 错误与状态码
+
+| 场景 | HTTP | 响应体 |
+| --- | --- | --- |
+| 正常 | 200 | `{"code":0,"msg":"ok","data":…}` |
+| random 过滤后无结果 | 200 | `{"code":404,"msg":"未找到符合过滤条件的表情","data":null}` |
+| emotes 的 id 不存在 | 404 | `{"detail":"Emote not found"}` |
+| 缺必填 `q` | 422 | FastAPI 参数校验体 |
+| `limit>50` 或 `animated` 非布尔 | 422 | FastAPI 参数校验体 |
+
+中文和韩文参数必须 percent-encode；直接拼进 URL 会被前置的 nginx 以 400 拒掉。
 
 ---
 
@@ -209,6 +223,13 @@ bash -n deploy/deploy.sh
 - 本地 23 项测试通过；公网验证 `/e/kakao-01-01` 返回 200 HTML 且图片加载（`naturalWidth=360`），未知 id 返回 404 HTML，Bot JSON 接口不变，`nginx -t` 通过。
 - 公网浏览器验证：`?q=早八` 检索到 1 张并保持地址，点卡片→弹窗→「网页详情」进入对应详情页；`?series=Kakao-Vol.1&tag=可爱` 显示「第1弹 · 标签：可爱」，点搜索框 ✕ 后地址变 `/?series=Kakao-Vol.1`。用户手动验收后续单独记录。
 - 回滚目标：先退 `rel-20261101T154954Z`（详情页已上线、静态资源仍是旧缓存名），再退 `rel-20261101T150927Z`（本次改动之前）。统计文件不受影响。
+
+### 2026-11-02 Bot 契约最小修复
+
+- FastAPI 与 Cloudflare Pages 的 `random` 过滤无匹配统一返回 HTTP 200、`code=404`、`data=null`；单张元数据缺失仍保持原有 404 形态。
+- 两份 HTML 的图片格式说明改为直接使用响应中的 `url`，需要 GIF 时按 `id` 拼接 `/images/gif/{id}.gif`；保留跟踪猫 32 张 PNG 原图，不转换素材。
+- 验证：25 项 pytest 通过；独立 Node 进程执行真实 Pages handler，重跑不存在的标签、套系及互斥过滤组合，均返回 200 与空结果信封；有效 PNG 请求仍返回可读取的原图地址。FastAPI 边界场景及两份 HTML 一致性检查通过。
+- 范围：仅修复本次 review 的无匹配状态码和格式说明；Pages 原有的参数校验及缺失 id 响应差异未调整，不代表两套后端完整契约一致。
 
 ## 📊 真实访问统计（2026-11-01）
 

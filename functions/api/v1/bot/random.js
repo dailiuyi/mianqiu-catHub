@@ -21,7 +21,7 @@ export async function onRequest(context) {
 
   if (items.length === 0) {
     return new Response(JSON.stringify({ code: 404, msg: "未找到符合过滤条件的表情", data: null }), {
-      status: 404,
+      status: 200,
       headers: {
         "Content-Type": "application/json; charset=utf-8",
         "Access-Control-Allow-Origin": "*",

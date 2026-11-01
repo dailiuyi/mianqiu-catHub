@@ -37,6 +37,22 @@ def test_bot_random_filter_series():
     assert data["data"]["series"] == "Kakao-Vol.1"
 
 
+def test_bot_random_no_match_returns_200_envelope():
+    resp = client.get("/api/v1/bot/random?tag=不存在的标签xyz")
+    assert resp.status_code == 200
+    assert resp.json() == {
+        "code": 404,
+        "msg": "未找到符合过滤条件的表情",
+        "data": None,
+    }
+
+
+def test_bot_emote_missing_returns_plain_detail():
+    resp = client.get("/api/v1/bot/emotes/nope-999")
+    assert resp.status_code == 404
+    assert resp.json() == {"detail": "Emote not found"}
+
+
 def test_bot_search_chinese_and_pinyin():
     # 搜索中文 "棉球小猫"
     resp = client.get("/api/v1/bot/search?q=棉球小猫")

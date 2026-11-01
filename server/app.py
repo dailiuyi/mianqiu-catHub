@@ -359,7 +359,7 @@ async def bot_get_random(
         filtered = [x for x in filtered if x.get("is_animated", False) == animated]
 
     if not filtered:
-        return JSONResponse(status_code=404, content={"code": 404, "msg": "未找到符合过滤条件的表情", "data": None})
+        return {"code": 404, "msg": "未找到符合过滤条件的表情", "data": None}
 
     chosen = random.choice(filtered)
     base_url = str(request.base_url)
