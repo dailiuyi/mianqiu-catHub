@@ -19,6 +19,7 @@ env/
 *.swp
 *.swo
 .DS_Store
+.wrangler/
 Thumbs.db
 
 # Runtime & Temporary Data

@@ -79,3 +79,43 @@ def test_index_page():
     resp = client.get("/")
     assert resp.status_code == 200
     assert "棉球小猫表情库" in resp.text
+
+
+def test_bot_mini_series():
+    resp = client.get("/api/v1/bot/random?series=Kakao-Mini.1")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["code"] == 0
+    assert data["data"]["series"] == "Kakao-Mini.1"
+
+
+def test_bot_community_series():
+    # 随机获取社区无字高清
+    resp_clean = client.get("/api/v1/bot/random?series=community_clean")
+    assert resp_clean.status_code == 200
+    assert resp_clean.json()["data"]["series"] == "community_clean"
+
+    # 随机获取社区带字梗图
+    resp_caption = client.get("/api/v1/bot/random?series=community_caption")
+    assert resp_caption.status_code == 200
+    assert resp_caption.json()["data"]["series"] == "community_caption"
+
+
+def test_bot_search_caption_meme():
+    # 搜索中文 "早八"
+    resp = client.get("/api/v1/bot/search?q=早八")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["code"] == 0
+    assert data["data"]["total"] > 0
+    assert any("早八" in item["title"] or "早八" in item["ocr_text"] for item in data["data"]["items"])
+
+    # 拼音搜索 "zaoba"
+    resp_py = client.get("/api/v1/bot/search?q=zaoba")
+    assert resp_py.status_code == 200
+    assert resp_py.json()["data"]["total"] > 0
+
+    # 搜索 "不想上班"
+    resp_work = client.get("/api/v1/bot/search?q=不想上班")
+    assert resp_work.status_code == 200
+    assert resp_work.json()["data"]["total"] > 0

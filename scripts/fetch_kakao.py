@@ -88,7 +88,7 @@ def fetch_and_save_kakao_pack(
         return []
 
     items = meta["contents"]["items"]
-    title_ko = meta.get("title", pack_info["title_ko"])
+    title_ko = meta.get("hero", {}).get("title") or meta.get("title") or pack_info["title_ko"]
     logging.info("成功获取套系 [%s (%s)]，包含 %d 张表情", title_zh, title_ko, len(items))
 
     if limit and limit > 0:
@@ -202,6 +202,7 @@ def fetch_and_save_kakao_pack(
 def main():
     parser = argparse.ArgumentParser(description="抓取 Kakao 官方「棉球小猫」表情包")
     parser.add_argument("--all", action="store_true", help="抓取所有已知系列")
+    parser.add_argument("--mini", action="store_true", help="仅抓取迷你系列 (Mini 1~5)")
     parser.add_argument("--slug", type=str, default="", help="指定抓取的系列 slug (如 fluffy-meow-meow-4)")
     parser.add_argument("--limit", type=int, default=None, help="每个系列抓取的表情数量上限（便于测试）")
     parser.add_argument("--dry-run", action="store_true", help="仅测试接口解析，不下载文件")
@@ -220,6 +221,8 @@ def main():
                 "title_zh": args.slug,
                 "series_id": f"Kakao-{args.slug}",
             })
+    elif args.mini:
+        targets = [item for item in KAKAO_SERIES_CATALOG if item["vol"] > 100]
     elif args.all:
         targets = KAKAO_SERIES_CATALOG
     else:
@@ -241,6 +244,25 @@ def main():
 
     logging.info("抓取完成！共收集 %d 个表情项目。", len(total_downloaded))
     if total_downloaded:
+        memes_json_path = "data/memes.json"
+        existing_memes = []
+        if os.path.exists(memes_json_path):
+            try:
+                with open(memes_json_path, "r", encoding="utf-8") as f:
+                    existing_memes = json.load(f).get("memes", [])
+            except Exception as e:
+                logging.warning("读取 %s 异常: %s", memes_json_path, e)
+        existing_map = {m["id"]: m for m in existing_memes}
+        for item in total_downloaded:
+            existing_map[item["id"]] = item
+        with open(memes_json_path, "w", encoding="utf-8") as f:
+            json.dump({
+                "version": "1.0.0",
+                "author": "쯔니 (zzni)",
+                "series_name": "몽실몽실 냥냥이 (棉球小猫)",
+                "total": len(existing_map),
+                "memes": list(existing_map.values())
+            }, f, ensure_ascii=False, indent=2)
         from scripts.build_index import build_index
         logging.info("正在更新全量静态索引与元数据...")
         build_index()

@@ -20,7 +20,8 @@
 ## 🌟 项目特性
 
 - **多源智能采集管线**：
-  - **Kakao 官方源一键拉取**：直接对接 Kakao 开放接口，无损拉取 1~10 弹官方动图全套素材与对应韩文名称。
+  - **Kakao 官方源一键拉取**：直接对接 Kakao 开放接口，无损拉取 1~10 弹官方主线动图（240 张）与 1~5 弹迷你系列动图（175 张），保留对应韩文标题。
+  - **社区高清与二创梗图入库**：归档官方合作高清无字图源（`community_clean`）与国内高频流传的经典带字二创梗图（`community_caption`，包含早八、不想上班、收到、好耶、委屈、贴贴等）。
   - **小红书/外部链接无水印抓取**：自动剥离 CDN 水印参数，提取高清原图。
   - **本地/QQ 收藏表情清洗**：自动扫描 QQ 本地缓存（`personal-emoji`），通过文件头魔数修正后缀（修复 GIF 被存为 JPG 的问题）并感知去重。
 - **图像双轨分级与感知去重**：
@@ -161,9 +162,15 @@ pip install -r requirements.txt
 ```
 
 ### 2. 抓取与导入表情
-- **拉取 Kakao 官方 1~10 弹原版动图**：
+- **拉取 Kakao 官方全量动图（主线 Vol.1~10 + 迷你 Mini.1~5）**：
   ```bash
   python -m scripts.fetch_kakao --all
+  # 或仅抓取迷你系列 (Mini.1~5)
+  python -m scripts.fetch_kakao --mini
+  ```
+- **导入与扩充社区高清图源及二创梗图**：
+  ```bash
+  python -m scripts.populate_community
   ```
 - **导入本地 QQ 收藏表情或下载文件夹**：
   ```bash

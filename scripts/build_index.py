@@ -118,7 +118,7 @@ def build_index() -> Dict[str, Any]:
         ocr_text = old_item.get("ocr_text", "")
         author = old_item.get("author", "쯔니 (zzni)")
 
-        # 智能根据文件名推断 Kakao 官方套系
+        # 智能根据文件名推断套系
         if not series or series == "community":
             if base_name.startswith("kakao-"):
                 parts = base_name.split("-")
@@ -130,7 +130,7 @@ def build_index() -> Dict[str, Any]:
                         series = f"Kakao-Mini.{mini_idx}"
                         if not title or title == base_name:
                             title = f"迷你棉球小猫 第{mini_idx}弹 #{idx_num:02d}"
-                            title_ko = f"미니미니 냥냥이 #{idx_num:02d}"
+                            title_ko = f"미니미니 냥냥이 #{idx_num:02d}" if mini_idx == 1 else f"미니미니 냥냥이 {mini_idx} #{idx_num:02d}"
                     else:
                         series = f"Kakao-Vol.{vol_num}"
                         if not title or title == base_name:
@@ -138,9 +138,16 @@ def build_index() -> Dict[str, Any]:
                             title_ko = f"몽실몽실 냥냥이 #{idx_num:02d}"
                     if not tags:
                         tags = ["可爱", "猫咪", "韩系", "官方原版", series]
+            elif "community_caption" in base_name or "comm_caption" in base_name or base_name.startswith("caption-"):
+                series = "community_caption"
+                if not tags:
+                    tags = ["可爱", "猫咪", "二创", "梗图", "community_caption"]
+            elif "community_clean" in base_name or "comm_clean" in base_name or base_name.startswith("clean-"):
+                series = "community_clean"
+                if not tags:
+                    tags = ["可爱", "猫咪", "社区高清", "无字", "community_clean"]
             else:
                 series = "community"
-
         if not title:
             title = base_name
         if not tags:

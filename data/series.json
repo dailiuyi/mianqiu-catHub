@@ -1,6 +1,41 @@
 {
   "series": [
     {
+      "id": "Kakao-Mini.1",
+      "name": "Kakao-Mini.1",
+      "count": 35
+    },
+    {
+      "id": "Kakao-Mini.2",
+      "name": "Kakao-Mini.2",
+      "count": 35
+    },
+    {
+      "id": "Kakao-Mini.3",
+      "name": "Kakao-Mini.3",
+      "count": 35
+    },
+    {
+      "id": "Kakao-Mini.4",
+      "name": "Kakao-Mini.4",
+      "count": 35
+    },
+    {
+      "id": "Kakao-Mini.5",
+      "name": "Kakao-Mini.5",
+      "count": 35
+    },
+    {
+      "id": "community_caption",
+      "name": "community_caption",
+      "count": 30
+    },
+    {
+      "id": "community_clean",
+      "name": "community_clean",
+      "count": 24
+    },
+    {
       "id": "Kakao-Vol.1",
       "name": "Kakao-Vol.1",
       "count": 24

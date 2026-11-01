@@ -2,19 +2,63 @@
   "tags": [
     {
       "name": "可爱",
-      "count": 240
+      "count": 469
     },
     {
       "name": "猫咪",
-      "count": 240
+      "count": 469
     },
     {
       "name": "韩系",
-      "count": 236
+      "count": 411
     },
     {
       "name": "官方原版",
-      "count": 236
+      "count": 411
+    },
+    {
+      "name": "Kakao-Mini.1",
+      "count": 35
+    },
+    {
+      "name": "Kakao-Mini.2",
+      "count": 35
+    },
+    {
+      "name": "Kakao-Mini.3",
+      "count": 35
+    },
+    {
+      "name": "Kakao-Mini.4",
+      "count": 35
+    },
+    {
+      "name": "Kakao-Mini.5",
+      "count": 35
+    },
+    {
+      "name": "二创",
+      "count": 30
+    },
+    {
+      "name": "梗图",
+      "count": 30
+    },
+    {
+      "name": "community_caption",
+      "count": 30
+    },
+    {
+      "name": "社区高清",
+      "count": 24
+    },
+    {
+      "name": "无字",
+      "count": 24
+    },
+    {
+      "name": "community_clean",
+      "count": 24
     },
     {
       "name": "Kakao-Vol.2",
@@ -55,6 +99,602 @@
     {
       "name": "Kakao-Vol.1",
       "count": 20
+    },
+    {
+      "name": "官方合作",
+      "count": 16
+    },
+    {
+      "name": "透明特写",
+      "count": 8
+    },
+    {
+      "name": "静图",
+      "count": 8
+    },
+    {
+      "name": "打工人",
+      "count": 2
+    },
+    {
+      "name": "摆烂",
+      "count": 2
+    },
+    {
+      "name": "喜欢",
+      "count": 2
+    },
+    {
+      "name": "撒娇",
+      "count": 2
+    },
+    {
+      "name": "早八",
+      "count": 1
+    },
+    {
+      "name": "痛苦",
+      "count": 1
+    },
+    {
+      "name": "挣扎",
+      "count": 1
+    },
+    {
+      "name": "起床困难户",
+      "count": 1
+    },
+    {
+      "name": "不想上班",
+      "count": 1
+    },
+    {
+      "name": "摸鱼",
+      "count": 1
+    },
+    {
+      "name": "不想努力了",
+      "count": 1
+    },
+    {
+      "name": "收到",
+      "count": 1
+    },
+    {
+      "name": "职场",
+      "count": 1
+    },
+    {
+      "name": "敬礼",
+      "count": 1
+    },
+    {
+      "name": "好的",
+      "count": 1
+    },
+    {
+      "name": "没问题",
+      "count": 1
+    },
+    {
+      "name": "好耶",
+      "count": 1
+    },
+    {
+      "name": "开心",
+      "count": 1
+    },
+    {
+      "name": "欢呼",
+      "count": 1
+    },
+    {
+      "name": "庆祝",
+      "count": 1
+    },
+    {
+      "name": "耶",
+      "count": 1
+    },
+    {
+      "name": "委屈",
+      "count": 1
+    },
+    {
+      "name": "难过",
+      "count": 1
+    },
+    {
+      "name": "可怜",
+      "count": 1
+    },
+    {
+      "name": "泪眼",
+      "count": 1
+    },
+    {
+      "name": "呜呜",
+      "count": 1
+    },
+    {
+      "name": "暗中观察",
+      "count": 1
+    },
+    {
+      "name": "偷看",
+      "count": 1
+    },
+    {
+      "name": "探头",
+      "count": 1
+    },
+    {
+      "name": "窥视",
+      "count": 1
+    },
+    {
+      "name": "暗中窥屏",
+      "count": 1
+    },
+    {
+      "name": "摸摸头",
+      "count": 1
+    },
+    {
+      "name": "安慰",
+      "count": 1
+    },
+    {
+      "name": "治愈",
+      "count": 1
+    },
+    {
+      "name": "拍拍",
+      "count": 1
+    },
+    {
+      "name": "摸摸",
+      "count": 1
+    },
+    {
+      "name": "贴贴",
+      "count": 1
+    },
+    {
+      "name": "蹭蹭",
+      "count": 1
+    },
+    {
+      "name": "粘人",
+      "count": 1
+    },
+    {
+      "name": "晚安",
+      "count": 1
+    },
+    {
+      "name": "睡觉",
+      "count": 1
+    },
+    {
+      "name": "盖被被",
+      "count": 1
+    },
+    {
+      "name": "好梦",
+      "count": 1
+    },
+    {
+      "name": "安安",
+      "count": 1
+    },
+    {
+      "name": "疑惑",
+      "count": 1
+    },
+    {
+      "name": "问号",
+      "count": 1
+    },
+    {
+      "name": "懵圈",
+      "count": 1
+    },
+    {
+      "name": "思考",
+      "count": 1
+    },
+    {
+      "name": "什么",
+      "count": 1
+    },
+    {
+      "name": "吃瓜",
+      "count": 1
+    },
+    {
+      "name": "看戏",
+      "count": 1
+    },
+    {
+      "name": "围观",
+      "count": 1
+    },
+    {
+      "name": "前排",
+      "count": 1
+    },
+    {
+      "name": "吃瓜群众",
+      "count": 1
+    },
+    {
+      "name": "生气",
+      "count": 1
+    },
+    {
+      "name": "气鼓鼓",
+      "count": 1
+    },
+    {
+      "name": "哼",
+      "count": 1
+    },
+    {
+      "name": "炸毛",
+      "count": 1
+    },
+    {
+      "name": "超凶",
+      "count": 1
+    },
+    {
+      "name": "发呆",
+      "count": 1
+    },
+    {
+      "name": "放空",
+      "count": 1
+    },
+    {
+      "name": "灵魂出窍",
+      "count": 1
+    },
+    {
+      "name": "神游",
+      "count": 1
+    },
+    {
+      "name": "愣住",
+      "count": 1
+    },
+    {
+      "name": "大哭",
+      "count": 1
+    },
+    {
+      "name": "流泪",
+      "count": 1
+    },
+    {
+      "name": "暴风哭泣",
+      "count": 1
+    },
+    {
+      "name": "破防",
+      "count": 1
+    },
+    {
+      "name": "呜哇",
+      "count": 1
+    },
+    {
+      "name": "点赞",
+      "count": 1
+    },
+    {
+      "name": "大拇指",
+      "count": 1
+    },
+    {
+      "name": "棒",
+      "count": 1
+    },
+    {
+      "name": "给力",
+      "count": 1
+    },
+    {
+      "name": "强",
+      "count": 1
+    },
+    {
+      "name": "干饭",
+      "count": 1
+    },
+    {
+      "name": "炫饭",
+      "count": 1
+    },
+    {
+      "name": "开吃",
+      "count": 1
+    },
+    {
+      "name": "干饭人",
+      "count": 1
+    },
+    {
+      "name": "真香",
+      "count": 1
+    },
+    {
+      "name": "拜拜",
+      "count": 1
+    },
+    {
+      "name": "再见",
+      "count": 1
+    },
+    {
+      "name": "挥手",
+      "count": 1
+    },
+    {
+      "name": "溜了",
+      "count": 1
+    },
+    {
+      "name": "886",
+      "count": 1
+    },
+    {
+      "name": "躺平",
+      "count": 1
+    },
+    {
+      "name": "累了",
+      "count": 1
+    },
+    {
+      "name": "歇菜",
+      "count": 1
+    },
+    {
+      "name": "不干了",
+      "count": 1
+    },
+    {
+      "name": "救救我",
+      "count": 1
+    },
+    {
+      "name": "救命",
+      "count": 1
+    },
+    {
+      "name": "救我",
+      "count": 1
+    },
+    {
+      "name": "抓狂",
+      "count": 1
+    },
+    {
+      "name": "救命啊",
+      "count": 1
+    },
+    {
+      "name": "乖巧",
+      "count": 1
+    },
+    {
+      "name": "坐好",
+      "count": 1
+    },
+    {
+      "name": "端庄",
+      "count": 1
+    },
+    {
+      "name": "听话",
+      "count": 1
+    },
+    {
+      "name": "乖",
+      "count": 1
+    },
+    {
+      "name": "盯",
+      "count": 1
+    },
+    {
+      "name": "注视",
+      "count": 1
+    },
+    {
+      "name": "凝视",
+      "count": 1
+    },
+    {
+      "name": "看着你",
+      "count": 1
+    },
+    {
+      "name": "默默注视",
+      "count": 1
+    },
+    {
+      "name": "比心",
+      "count": 1
+    },
+    {
+      "name": "爱心",
+      "count": 1
+    },
+    {
+      "name": "爱你",
+      "count": 1
+    },
+    {
+      "name": "心心",
+      "count": 1
+    },
+    {
+      "name": "震惊",
+      "count": 1
+    },
+    {
+      "name": "惊呆",
+      "count": 1
+    },
+    {
+      "name": "吓到",
+      "count": 1
+    },
+    {
+      "name": "目瞪口呆",
+      "count": 1
+    },
+    {
+      "name": "什么鬼",
+      "count": 1
+    },
+    {
+      "name": "无语",
+      "count": 1
+    },
+    {
+      "name": "擦汗",
+      "count": 1
+    },
+    {
+      "name": "尴尬",
+      "count": 1
+    },
+    {
+      "name": "绝了",
+      "count": 1
+    },
+    {
+      "name": "离谱",
+      "count": 1
+    },
+    {
+      "name": "卖萌",
+      "count": 1
+    },
+    {
+      "name": "求求了",
+      "count": 1
+    },
+    {
+      "name": "软萌",
+      "count": 1
+    },
+    {
+      "name": "好不好嘛",
+      "count": 1
+    },
+    {
+      "name": "困了",
+      "count": 1
+    },
+    {
+      "name": "犯困",
+      "count": 1
+    },
+    {
+      "name": "哈欠",
+      "count": 1
+    },
+    {
+      "name": "迷迷糊糊",
+      "count": 1
+    },
+    {
+      "name": "好困",
+      "count": 1
+    },
+    {
+      "name": "心碎",
+      "count": 1
+    },
+    {
+      "name": "心痛",
+      "count": 1
+    },
+    {
+      "name": "难受",
+      "count": 1
+    },
+    {
+      "name": "扎心",
+      "count": 1
+    },
+    {
+      "name": "心拔凉",
+      "count": 1
+    },
+    {
+      "name": "打卡",
+      "count": 1
+    },
+    {
+      "name": "签到",
+      "count": 1
+    },
+    {
+      "name": "冒泡",
+      "count": 1
+    },
+    {
+      "name": "来了",
+      "count": 1
+    },
+    {
+      "name": "打卡成功",
+      "count": 1
+    },
+    {
+      "name": "加油",
+      "count": 1
+    },
+    {
+      "name": "奋斗",
+      "count": 1
+    },
+    {
+      "name": "冲鸭",
+      "count": 1
+    },
+    {
+      "name": "打气",
+      "count": 1
+    },
+    {
+      "name": "奥利给",
+      "count": 1
+    },
+    {
+      "name": "下班",
+      "count": 1
+    },
+    {
+      "name": "冲啊",
+      "count": 1
+    },
+    {
+      "name": "飞奔",
+      "count": 1
+    },
+    {
+      "name": "快乐",
+      "count": 1
+    },
+    {
+      "name": "放假了",
+      "count": 1
     }
   ]
 }
