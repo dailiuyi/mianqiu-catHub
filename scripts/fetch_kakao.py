@@ -9,11 +9,12 @@ import sys
 import json
 import argparse
 import logging
+import time
 from typing import Dict, Any, List, Optional
+from concurrent.futures import ThreadPoolExecutor, as_completed
 import httpx
 from PIL import Image
 import io
-
 from scripts.image_utils import detect_image_format, calculate_sha256, compute_dhash, generate_thumbnail
 
 logging.basicConfig(level=logging.INFO, format="[%(levelname)s] %(message)s")
@@ -99,25 +100,22 @@ def fetch_and_save_kakao_pack(
 
     results = []
 
-    for idx, item in enumerate(items, start=1):
-        # 优先使用 animatedUrl (动图预览)，若无则使用 thumbnailUrl
+    def process_item(idx: int, item: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         img_url = clean_cdn_url(item.get("animatedUrl") or item.get("thumbnailUrl") or "")
         if not img_url:
-            continue
+            return None
 
         item_id = f"kakao-{vol:02d}-{idx:02d}"
         if dry_run:
-            results.append({
+            return {
                 "id": item_id,
                 "title": f"{title_zh} #{idx:02d}",
                 "title_ko": f"{title_ko} #{idx:02d}",
                 "series": series_id,
                 "source_url": img_url,
-            })
-            continue
+            }
 
         try:
-            # 检查本地是否已有下载好的文件
             existing_file = None
             for check_ext in ("webp", "gif", "png"):
                 check_path = os.path.join(raw_dir, f"{item_id}.{check_ext}")
@@ -129,17 +127,23 @@ def fetch_and_save_kakao_pack(
                 with open(existing_file, "rb") as ef:
                     data = ef.read()
             else:
-                r = client.get(img_url, headers=HEADERS, timeout=20.0)
-                if r.status_code != 200:
-                    logging.warning("下载 %s 失败，HTTP %d", img_url, r.status_code)
-                    continue
-                data = r.content
+                # 重试下载最多 2 次
+                data = None
+                for attempt in range(2):
+                    try:
+                        r = client.get(img_url, headers=HEADERS, timeout=15.0)
+                        if r.status_code == 200:
+                            data = r.content
+                            break
+                    except Exception:
+                        time.sleep(0.5)
+                if not data:
+                    logging.warning("下载 %s 失败", img_url)
+                    return None
 
-            # 识别格式
             ext = detect_image_format(data) or "webp"
             sha256_hash = calculate_sha256(data)
 
-            # 打开图片提取尺寸与 dHash
             with Image.open(io.BytesIO(data)) as pil_img:
                 width, height = pil_img.size
                 is_animated = getattr(pil_img, "is_animated", False)
@@ -150,7 +154,6 @@ def fetch_and_save_kakao_pack(
             with open(raw_path, "wb") as f:
                 f.write(data)
 
-            # 生成 200px WebP 缩略图
             thumb_data, tw, th = generate_thumbnail(data, max_width=200)
             thumb_filename = f"{item_id}.webp"
             thumb_path = os.path.join(thumb_dir, thumb_filename)
@@ -175,12 +178,24 @@ def fetch_and_save_kakao_pack(
                 "raw_file": f"images/raw/{raw_filename}",
                 "thumb_file": f"images/thumbs/{thumb_filename}",
                 "source_url": img_url,
+                "_order": idx,
             }
-            results.append(record)
             logging.info("已保存: %s (%dx%d, %s, %d KB)", raw_filename, width, height, ext, len(data) // 1024)
+            return record
         except Exception as e:
             logging.error("处理 %s 出现异常: %s", img_url, e)
+            return None
 
+    with ThreadPoolExecutor(max_workers=8) as pool:
+        futures = [pool.submit(process_item, idx, it) for idx, it in enumerate(items, start=1)]
+        for fut in as_completed(futures):
+            res = fut.result()
+            if res:
+                results.append(res)
+
+    results.sort(key=lambda x: x.get("_order", 0))
+    for r in results:
+        r.pop("_order", None)
     return results
 
 
