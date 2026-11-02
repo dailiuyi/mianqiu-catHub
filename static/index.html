@@ -8,7 +8,7 @@
   <link rel="icon" type="image/svg+xml" href="static/favicon.svg" id="favicon">
   <title>棉球小猫表情库 (棉花小猫) | mianqiu-catHub</title>
   <link rel="preload" href="static/fonts/zcool-kuaile-subset.woff2?v=cat-expressions-2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="static/style.css?v=cat-expressions-2">
+  <link rel="stylesheet" href="static/style.css?v=home-legal-1">
   <!-- 引入 JSZip 用于客户端无服务器并发打包下载 -->
   <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js" defer></script>
 </head>
@@ -29,11 +29,10 @@
       <svg class="wordmark-icon" aria-hidden="true"><use href="#cat-face"/></svg>
       <span>棉球小猫表情库</span>
     </a>
-    <nav class="credits" aria-label="作者与接口">
+    <nav class="credits" aria-label="原作者与官方主页">
       <span>原作者 <b>쯔니 (zzni)</b></span>
       <a href="https://e.kakao.com/creator/69020H" target="_blank" rel="noopener">Kakao 商店</a>
       <a href="https://www.instagram.com/zz_ni_e" target="_blank" rel="noopener">Instagram</a>
-      <button type="button" class="link-btn" id="open-api-btn">Bot API 约定</button>
     </nav>
   </header>
 
@@ -129,120 +128,6 @@
     </div>
   </dialog>
 
-  <!-- Bot API 说明弹窗 -->
-  <dialog id="api-modal" class="sheet api-sheet" aria-labelledby="api-title">
-    <button type="button" class="sheet-close" id="api-modal-close" aria-label="关闭">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7 L17 17 M17 7 L7 17"/></svg>
-    </button>
-    <h2 id="api-title">第三方 QQ Bot 只读 HTTP 接口</h2>
-    <p class="api-lead">面向 OneBot / Lagrange / NoneBot 等第三方机器人提供只读 HTTP 接口，数据格式向后兼容，字段只增不减。</p>
-
-    <section class="api-block">
-      <h3>接口</h3>
-      <ul class="api-list">
-        <li data-path="/api/v1/bot/random">
-          <div class="api-head">
-            <span class="api-method">GET</span>
-            <code>/api/v1/bot/random?series=&amp;tag=&amp;animated=</code>
-            <button type="button" class="api-copy" data-copy>复制地址</button>
-            <a class="api-open" target="_blank" rel="noreferrer">打开</a>
-          </div>
-          <p>随机返回一张表情，支持按套系、标签或是否动图过滤；没有匹配结果时仍返回 HTTP 200，响应体为 <code>code=404</code>、<code>data=null</code>。</p>
-        </li>
-        <li data-path="/api/v1/bot/search?q=早八">
-          <div class="api-head">
-            <span class="api-method">GET</span>
-            <code>/api/v1/bot/search?q=&amp;limit=10</code>
-            <button type="button" class="api-copy" data-copy>复制地址</button>
-            <a class="api-open" target="_blank" rel="noreferrer">打开</a>
-          </div>
-          <p>关键词全文检索（支持中文、拼音、韩文原名、OCR 文本），<code>limit</code> 默认 10、最大 50，<code>offset</code> 翻页；只认这三个参数，多传的 <code>tag</code>、<code>animated</code>、<code>series</code> 会被忽略。空结果仍是 <code>code=0</code>。</p>
-        </li>
-        <li data-path="/api/v1/bot/emotes/kakao-01-01">
-          <div class="api-head">
-            <span class="api-method">GET</span>
-            <code>/api/v1/bot/emotes/{id}</code>
-            <button type="button" class="api-copy" data-copy>复制地址</button>
-            <a class="api-open" target="_blank" rel="noreferrer">打开</a>
-          </div>
-          <p>获取单张表情详细元数据与高清直链；id 不存在时返回 404 与 <code>{"detail":"Emote not found"}</code>。WebP 不被客户端支持时，可用 <code>/images/gif/{id}.gif</code> 取同一张的 GIF 版。</p>
-        </li>
-        <li data-path="/api/v1/bot/tags">
-          <div class="api-head">
-            <span class="api-method">GET</span>
-            <code>/api/v1/bot/tags</code>
-            <button type="button" class="api-copy" data-copy>复制地址</button>
-            <a class="api-open" target="_blank" rel="noreferrer">打开</a>
-          </div>
-          <p>获取当前库内所有可用标签及表情数量。</p>
-        </li>
-        <li data-path="/api/v1/bot/series">
-          <div class="api-head">
-            <span class="api-method">GET</span>
-            <code>/api/v1/bot/series</code>
-            <button type="button" class="api-copy" data-copy>复制地址</button>
-            <a class="api-open" target="_blank" rel="noreferrer">打开</a>
-          </div>
-          <p>获取全部套系及数量；返回的 <code>id</code> 可直接用作随机接口的 <code>series</code> 参数。</p>
-        </li>
-        <li data-path="/data/memes.json">
-          <div class="api-head">
-            <span class="api-method">GET</span>
-            <code>/data/memes.json</code>
-            <button type="button" class="api-copy" data-copy>复制地址</button>
-            <a class="api-open" target="_blank" rel="noreferrer">打开</a>
-          </div>
-          <p>无需后端服务即可由 CDN / GitHub Pages 直连读取的全量静态元数据快照。</p>
-        </li>
-        <li data-path="/e/kakao-01-01">
-          <div class="api-head">
-            <span class="api-method">GET</span>
-            <code>/e/{id}</code>
-            <button type="button" class="api-copy" data-copy>复制地址</button>
-            <a class="api-open" target="_blank" rel="noreferrer">打开</a>
-          </div>
-          <p>表情详情网页：大图、套系、标签和下载按钮都在这一页，可直接分享。</p>
-        </li>
-        <li data-path="/?q=早八">
-          <div class="api-head">
-            <span class="api-method">GET</span>
-            <code>/?q=&amp;series=&amp;tag=</code>
-            <button type="button" class="api-copy" data-copy>复制地址</button>
-            <a class="api-open" target="_blank" rel="noreferrer">打开</a>
-          </div>
-          <p>搜索结果网页：关键词、套系、标签都可写进地址，刷新和分享能还原。</p>
-        </li>
-      </ul>
-    </section>
-
-    <section class="api-block">
-      <h3>Agent 提示词</h3>
-      <p class="api-hint">已有 bot 可把下面两行加入系统提示词，接口地址已按正式站点填好。</p>
-      <pre class="api-code"><code id="api-prompt"></code></pre>
-      <button type="button" class="chunky-btn" id="api-copy-prompt">复制提示词</button>
-    </section>
-
-    <section class="api-block">
-      <h3>调用示例</h3>
-      <pre class="api-code"><code id="api-sample"></code></pre>
-      <button type="button" class="chunky-btn" id="api-copy-code">复制示例</button>
-    </section>
-
-    <section class="api-block">
-      <h3>说明</h3>
-      <dl class="api-faq">
-        <dt>是否需要密钥</dt>
-        <dd>不需要。接口只读、公开，正常频率调用即可。</dd>
-        <dt>图片格式</dt>
-        <dd>原图格式以接口返回的 <code>format</code> 为准，下载请直接使用 <code>url</code>；需要 GIF 时，按 <code>id</code> 拼接 <code>/images/gif/{id}.gif</code>，不要固定原图后缀。</dd>
-        <dt>接口稳定性</dt>
-        <dd>字段只增不减，已有的名称和结构不会变更。</dd>
-        <dt>离线使用</dt>
-        <dd>直接读取 <code>/data/memes.json</code> 全量快照，不依赖后端服务。</dd>
-      </dl>
-    </section>
-  </dialog>
-
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <footer class="footer">
@@ -252,11 +137,12 @@
         <span id="footer-stats-line"></span>
         <span class="footer-since" id="footer-since"></span>
       </p>
-      <p>个人自用、非商业归档。形象著作权归原作者 쯔니 (zzni) 及 Kakao Corp 所有，喜欢请去 Kakao 商店支持正版。</p>
+      <p>非官方、非商业表情整理站，与原作者及 Kakao 无隶属或合作关系。原作署名 쯔니 (zzni)，素材权利归各自权利人所有。请支持正版。</p>
+      <p><a href="static/disclaimer.html">版权与使用免责声明 · 权利投诉</a></p>
     </div>
   </footer>
 
   <script src="static/cat.js?v=cat-expressions-2"></script>
-  <script src="static/app.js?v=cat-expressions-2"></script>
+  <script src="static/app.js?v=home-legal-1"></script>
 </body>
 </html>

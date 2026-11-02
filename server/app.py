@@ -278,7 +278,7 @@ DETAIL_PAGE = """<!DOCTYPE html>
 <meta name="theme-color" content="#ff9ccd">
 <title>{page_title} · 棉球小猫表情库</title>
 <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
-<link rel="stylesheet" href="/static/style.css?v=cat-expressions-2">
+<link rel="stylesheet" href="/static/style.css?v=home-legal-1">
 </head>
 <body class="detail-page">
 <header class="detail-bar">
@@ -288,7 +288,7 @@ DETAIL_PAGE = """<!DOCTYPE html>
 <main class="detail">
 {body}
 </main>
-<footer class="detail-foot"><p>个人自用、非商业归档。形象著作权归原作者 쯔니 (zzni) 及 Kakao Corp 所有，喜欢请去 Kakao 商店支持正版。</p></footer>
+<footer class="detail-foot"><p>非官方、非商业表情整理站。原作署名 쯔니 (zzni)，素材权利归各自权利人所有；可下载不代表获得使用授权。<a href="/static/disclaimer.html">版权声明与权利投诉</a></p></footer>
 </body>
 </html>"""
 

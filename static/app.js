@@ -21,9 +21,6 @@
     'https://raw.githubusercontent.com/dailiuyi/mianqiu-catHub/main/'
   ];
 
-  // 接入教程里对外给出的正式地址；本地预览时抄到的也是这个域名
-  const API_BASE = 'https://mianhuacat.elma-gohan.xyz';
-
   const BATCH_SIZE = 36;
   const QUICK_SEARCH_COUNT = 12;
   const SLEEP_AFTER_MS = 25000;
@@ -92,7 +89,6 @@
   const downloadGifBtn = $('download-gif-btn');
   const detailPageBtn = $('detail-page-btn');
 
-  const apiModal = $('api-modal');
   const toast = $('toast');
 
   const heroCat = CottonCat.create(heroCatEl, { label: '戳一下小猫，送你一张表情' });
@@ -743,58 +739,6 @@
     });
   }
 
-  // ---------- Bot 接入教程弹窗 ----------
-
-  // Bot 弹窗里的两段可复制文本，域名固定为正式站点
-
-  function apiSample() {
-    return `import requests
-
-base = "${API_BASE}"
-
-# 随机取一张动图
-r = requests.get(f"{base}/api/v1/bot/random",
-                 params={"animated": "true"}).json()
-img = requests.get(r["data"]["url"]).content
-
-# 按关键词检索，q 可用中文、拼音首字母或图中文字
-r = requests.get(f"{base}/api/v1/bot/search",
-                 params={"q": "贴贴", "limit": 3}).json()
-url = r["data"]["items"][0]["url"]
-
-# 发送：OneBot 用 CQ:image，NoneBot 用 MessageSegment.image(url)`;
-  }
-
-  function apiPrompt() {
-    return `发表情时请求 ${API_BASE}/api/v1/bot/search?q=<情绪词，如委屈/好耶/困了>，用返回的 data.items[0].url 作为图片地址；
-没有合适结果时请求 ${API_BASE}/api/v1/bot/random 随机取一张。接口只读、无需密钥，每次只发一张。`;
-  }
-
-  async function copyText(text, okText) {
-    try {
-      await navigator.clipboard.writeText(text);
-      showToast(okText);
-    } catch (e) {
-      window.prompt('浏览器不让自动复制，手动抄一下：', text);
-    }
-  }
-
-  function onApiModalClick(e) {
-    const copyBtn = e.target.closest('[data-copy]');
-    if (copyBtn) {
-      const item = copyBtn.closest('[data-path]');
-      copyText(`${API_BASE}${item.dataset.path}`, '地址抄好了，贴给机器人吧');
-      return;
-    }
-    if (e.target.closest('#api-copy-code')) {
-      copyText(apiSample(), '代码抄好了，改改就能跑');
-      return;
-    }
-    if (e.target.closest('#api-copy-prompt')) {
-      copyText(apiPrompt(), '这两行抄好了，贴进系统提示词');
-    }
-  }
-
   // ---------- 页脚真实统计：Bot 接口调用量与页面浏览量 ----------
   const VISITOR_KEY = 'mianqiu-visitor-id';
 
@@ -890,19 +834,6 @@ url = r["data"]["items"][0]["url"]
     closeOnBackdrop(lightbox);
     copyLinkBtn.addEventListener('click', copyImageLink);
     copyImgBtn.addEventListener('click', copyImageBlob);
-
-    $('open-api-btn').addEventListener('click', () => {
-      $('api-sample').textContent = apiSample();
-      $('api-prompt').textContent = apiPrompt();
-      document.querySelectorAll('#api-modal li[data-path]').forEach(li => {
-        const link = li.querySelector('.api-open');
-        if (link) link.href = `${API_BASE}${li.dataset.path}`;
-      });
-      apiModal.showModal();
-    });
-    $('api-modal-close').addEventListener('click', () => apiModal.close());
-    closeOnBackdrop(apiModal);
-    apiModal.addEventListener('click', onApiModalClick);
 
     batchSelectAllBtn.addEventListener('click', toggleSelectAll);
 

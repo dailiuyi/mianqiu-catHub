@@ -14,9 +14,14 @@
 - **Kakao 官方系列**：**몽실몽실 냥냥이**（中文常用译名：**棉球小猫** / 蓬蓬猫）
 - **官方作者主页**：[Kakao Emoticon Shop - zzni (69020H)](https://e.kakao.com/creator/69020H)
 - **作者 Instagram**：[@zz_ni_e](https://www.instagram.com/zz_ni_e)
-- **非商业声明**：
-  本项目为个人自用、开源技术交流与非商业表情存档库。所有表情包艺术形象、美术版权均归原作者 **쯔니（zzni）** 及 Kakao Corp 所有。请勿将本项目素材用于任何商业营利目的；如需商用请联系原作者或前往 Kakao 官方平台购买正版表情。
-  仓库公开不代表表情素材获得开源或再分发授权，素材版权与代码可见性分开处理。
+- **非官方与权利边界**：
+  本项目为非官方、非商业表情整理与技术交流站，与原作者及 Kakao 无隶属、合作或背书关系。原作署名为 **쯔니（zzni）**；原作、社区改图和其他素材的权利归相应权利人所有，不将 Kakao 平台身份等同于全部素材的著作权归属。
+  本仓库不提供全部素材已获展示、复制或传播授权的证明。代码公开、素材可下载、接口可访问都不构成素材授权；购买官方表情也不当然取得站外传播或商用许可。未经相应权利人许可，请勿商用、公开转载、批量再分发或作其他超出法律允许范围的使用。
+- **使用责任与权利通知**：
+  使用者及其 Bot / Agent 须核实所需授权，并遵守适用法律和平台规则，不得冒充官方、骚扰、刷屏或传播违法内容。非商业、学习交流和免责声明均不能替代授权，也不排除本站依法应承担的责任。本站不保证内容准确或服务持续可用，法律规定不得免除的责任不因声明而免除。
+  权利人或代理人可通过 [GitHub Issues](https://github.com/dailiuyi/mianqiu-catHub/issues/new) 提交通知，提供页面或素材 ID、权利说明、处理诉求和可公开的联系方式；不要公开证件等敏感材料，需非公开核验时先协商渠道。维护者将核实并依法处理删除、断链或署名更正等请求。完整网页声明为 `/static/disclaimer.html`，首页页脚和详情页均提供入口。使用独立静态页面，避免首页无限加载列表使页脚声明在直达或阅读时偏离视口；无需 JavaScript，也不依赖后端。
+- **风险依据（2026-11-02）**：
+  [《中华人民共和国著作权法》](https://www.gov.cn/guoqing/2021-10/29/content_5647633.htm)第十条规定复制权、信息网络传播权等权利；第二十四条的个人学习、研究或欣赏例外有条件限制，不能据此认定公开素材站当然免责。移除首页接入教程不改变素材与接口仍公开可访问的事实。缺少授权时，公开展示、下载、改图和 Bot 转发仍有侵权风险；实质降险需取得相应授权，或停止公开提供未获授权的素材。本次未变更素材库、下载功能或接口访问权限；此处为项目风险提示，不是针对具体争议的法律意见。
 
 ---
 
@@ -43,6 +48,12 @@
 ---
 
 ## 🤖 第三方 QQ Bot 只读 HTTP 接口约定
+
+给朋友的 Agent 只需提供一个说明地址：**https://mianhuacat.elma-gohan.xyz/static/agent.txt**。它是 UTF-8 纯文本，包含使用边界、最短接入流程、接口参数、响应字段和错误处理，不需要先操作网页。
+
+2026-11-02 起，首页移除 API 按钮、接入弹窗、提示词和调用示例；动态接口保持不变。说明文件通过现有 `/static/` 静态路径提供，无需新增服务路由或 nginx 放行规则，不在首页展示。该地址需部署含 `static/agent.txt` 的版本后才可在线读取，本地修改不代表已上线。
+
+本地验收（2026-11-02）：`node --check static/app.js`、`cmp index.html static/index.html` 通过；用隔离 `MIANQIU_STATS_PATH` 的 uvicorn 实跑首页搜索、大图加载、首页及详情页到声明页的导航，检查 1440px / 390px 排版。`/static/agent.txt` 返回 HTTP 200、`text/plain; charset=utf-8`；按说明完成搜索取图、随机动图、random 无匹配和非法 limit 的响应检查。未运行全量测试、未进行生产部署；仅隐藏首页入口不构成鉴权或私有访问控制。
 
 为方便第三方 QQ 机器人（如基于 OneBot、Lagrange、NoneBot、Mirai 等开发）调用，接口统一返回 JSON 格式，严格遵循以下契约。
 
@@ -168,6 +179,26 @@ pip install -r requirements.txt
 python -m uvicorn server.app:app --host 127.0.0.1 --port 8000
 ```
 访问 `http://localhost:8000` 即可在浏览器中浏览表情库；第三方 QQ Bot 访问 `http://localhost:8000/api/v1/bot/...` 即可调用只读接口。
+
+### 4. 本机常驻服务（2026-11-02）
+
+本机 `elma-ubuntu-pc` 已安装并启用用户级服务 `mianqiu-cathub-local.service`，登录后自动启动，不依赖当前终端。服务配置位于 `~/.config/systemd/user/mianqiu-cathub-local.service`，直接运行 `/data/mianqiu-catHub/.venv/bin/python -m uvicorn server.app:app --host 127.0.0.1 --port 8093`，工作目录为 `/data/mianqiu-catHub`。这里只部署本机，未修改远端生产服务。
+
+- 首页：`http://127.0.0.1:8093/`
+- Agent 说明：`http://127.0.0.1:8093/static/agent.txt`
+- 完整声明：`http://127.0.0.1:8093/static/disclaimer.html`
+- 独立统计：`~/.local/state/mianqiu-cathub-local/stats.json`，不复用仓库 `.state/stats.json`。
+
+仅监听回环地址，其他设备不能直接访问。Agent 说明中的正式站基址仍为生产域名；调试本地 API 时将请求基址改为 `http://127.0.0.1:8093`，不要将生产接口响应误认为本地验证。
+
+```bash
+systemctl --user status mianqiu-cathub-local.service
+systemctl --user restart mianqiu-cathub-local.service
+systemctl --user stop mianqiu-cathub-local.service
+journalctl --user -u mianqiu-cathub-local.service -n 50 --no-pager
+```
+
+本次部署验证：systemd 显示 `active/running`、`enabled`；首页、Agent 文档、声明页和 summary 均 HTTP 200；通过本地搜索接口取图并读取图片成功；真实浏览器完成「早八」搜索与大图加载。未配置注销后持续运行或局域网/公网访问。
 
 ---
 

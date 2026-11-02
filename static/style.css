@@ -94,15 +94,13 @@ a { color: inherit; }
 
 .credits b { color: var(--text); font-weight: 600; }
 
-.credits a, .link-btn {
+.credits a {
   color: var(--text);
   text-decoration: underline;
   text-decoration-color: #fff;
   text-decoration-thickness: 2px;
   text-underline-offset: 4px;
 }
-
-.link-btn { background: none; border: none; font-size: 13px; }
 
 /* ---------- 首屏 ---------- */
 .hero {
@@ -947,90 +945,6 @@ a { color: inherit; }
   padding-top: 8px;
 }
 
-.api-sheet[open] {
-  display: block;
-  width: 660px;
-  padding: 32px;
-}
-
-.api-sheet h2 {
-  font-size: 20px;
-  font-weight: 600;
-  padding-right: 40px;
-}
-
-.api-lead { margin-top: 6px; color: #94798a; max-width: 34em; }
-
-.api-block { margin-top: 24px; }
-
-.api-block h3 {
-  font-size: 15px;
-  font-weight: 600;
-  margin-bottom: 10px;
-}
-
-.api-list { list-style: none; display: grid; gap: 12px; }
-
-.api-list li {
-  padding: 12px 14px;
-  border: 2px dashed var(--pink-soft);
-  border-radius: 18px;
-}
-
-.api-head {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.api-list code, .api-faq code, .api-code code {
-  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
-  font-size: 13px;
-  word-break: break-all;
-}
-
-.api-list p { margin-top: 6px; font-size: 14px; color: #94798a; }
-.api-list p code { color: #b8457c; }
-
-.api-hint { margin-bottom: 10px; font-size: 14px; color: #94798a; }
-.api-hint b { color: #4b3a41; }
-
-.api-method {
-  flex: none;
-  padding: 0 8px;
-  border-radius: 8px;
-  background: var(--pink-soft);
-  font-size: 12px;
-  font-weight: 700;
-}
-
-.api-copy {
-  margin-left: auto;
-  padding: 2px 12px;
-  border: 2px solid var(--ink);
-  border-radius: 999px;
-  background: var(--cotton);
-  color: #4b3a41;
-  font-size: 12px;
-  box-shadow: 0 2px 0 var(--pink-shadow);
-}
-
-.api-copy:active { transform: translateY(2px); box-shadow: none; }
-
-.api-open {
-  padding: 2px 12px;
-  border: 2px solid var(--ink);
-  border-radius: 999px;
-  background: var(--cotton);
-  color: #4b3a41;
-  font-size: 12px;
-  text-decoration: none;
-  box-shadow: 0 2px 0 var(--pink-shadow);
-}
-
-.api-open:active { transform: translateY(2px); box-shadow: none; }
-
 /* ---------- 表情详情页 /e/{id} ---------- */
 .detail-page {
   background:
@@ -1154,33 +1068,6 @@ a { color: inherit; }
   text-align: center;
 }
 
-.api-code {
-  padding: 14px 16px;
-  border-radius: 16px;
-  background: #fff0f5;
-  border: 2px solid var(--pink-soft);
-  overflow-x: auto;
-  font-size: 13px;
-  line-height: 1.7;
-  white-space: pre;
-}
-
-.api-code + .chunky-btn { margin-top: 10px; font-size: 14px; }
-
-/* 两行提示词里有长 URL，允许折行，其余代码块保持原始行不折断 */
-#api-prompt { white-space: pre-wrap; overflow-wrap: anywhere; }
-
-.api-faq { display: grid; gap: 10px; font-size: 14px; }
-
-.api-faq dt {
-  font-weight: 600;
-  color: #4b3a41;
-}
-
-.api-faq dd { color: #8a6f7d; }
-
-.api-faq code { color: #b8457c; }
-
 /* 轻提示 */
 .toast {
   position: fixed;
@@ -1214,6 +1101,10 @@ a { color: inherit; }
 .footer-cat { flex: none; width: 36px; height: 26px; color: var(--ink); }
 .footer-main { display: flex; flex-direction: column; gap: 8px; }
 .footer p { max-width: 46em; }
+.legal { max-width: 46em; margin: 32px auto; padding: 0 24px 40px; }
+.legal h1 { font-size: 24px; color: var(--ink); }
+.legal h2 { margin-top: 24px; font-size: 18px; color: var(--ink); }
+.legal p { margin-top: 12px; overflow-wrap: anywhere; }
 .footer-stats { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
 .footer-stats b { color: var(--ink); }
 .footer-since { display: block; margin-top: 2px; font-size: 12px; opacity: 0.75; }
@@ -1235,7 +1126,6 @@ a { color: inherit; }
   .lightbox[open] { grid-template-columns: 1fr; width: auto; }
   .lightbox-stage { min-height: 220px; border-right: none; border-bottom: 3px solid var(--ink); }
   .lightbox-stage img { max-height: 40vh; }
-  .api-sheet[open] { padding: 24px 18px; }
   .detail { grid-template-columns: 1fr; padding: 18px 16px 24px; }
   .detail-bar { padding: 14px 16px 0; }
   .detail-stage img { max-height: 46vh; object-fit: contain; }
