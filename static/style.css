@@ -102,6 +102,46 @@ a { color: inherit; }
   text-underline-offset: 4px;
 }
 
+/* 支持正版按钮：主入口，顶栏与首屏共用 */
+.store-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 16px 6px;
+  border: 2.5px solid var(--ink);
+  border-radius: 999px;
+  background: var(--pink-grad);
+  color: #4b3a41;
+  font-family: var(--font-display);
+  font-size: 14px;
+  text-decoration: none;
+  box-shadow: 0 3px 0 var(--pink-shadow);
+  transition: transform 0.12s var(--pop), box-shadow 0.12s;
+}
+
+.store-btn:hover { transform: translateY(-2px) rotate(-2deg); }
+.store-btn:active { transform: translateY(3px); box-shadow: none; }
+
+.store-btn-lg { padding: 9px 26px 10px; font-size: 17px; }
+
+/* 虚线描边的次要入口 */
+.ghost-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 16px;
+  border: 2.5px dashed var(--ink);
+  border-radius: 999px;
+  background: #fff0f5;
+  color: #4b3a41;
+  font-family: var(--font-display);
+  font-size: 14px;
+  text-decoration: none;
+}
+
+.ghost-btn:hover { transform: translateY(-2px) rotate(2deg); }
+.ghost-btn:active { transform: translateY(2px); }
+
 /* ---------- 首屏 ---------- */
 .hero {
   position: relative;
@@ -134,9 +174,10 @@ a { color: inherit; }
 .hero-title {
   font-family: var(--font-display);
   font-weight: 400;
-  font-size: clamp(36px, 6.4vw, 60px);
+  font-size: clamp(28px, 6.4vw, 60px);
   line-height: 1.15;
   letter-spacing: 0.02em;
+  text-wrap: balance;
 }
 
 .hero-sub {
@@ -146,6 +187,51 @@ a { color: inherit; }
 }
 
 .hero-sub b { color: var(--text); }
+
+.hero-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.hero-note { font-size: 13px; color: var(--muted); }
+
+/* ---------- 粉丝站介绍 ---------- */
+.about-band {
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
+  align-items: start;
+  gap: 18px 28px;
+  width: min(1000px, calc(100% - 32px));
+  margin: 18px auto 0;
+  padding: 24px 28px;
+  border: 3px solid var(--ink);
+  border-radius: 28px;
+  background: var(--cotton);
+  color: #4b3a41;
+  box-shadow: 0 5px 0 var(--pink-shadow);
+}
+
+.about-copy h2 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 22px;
+}
+
+.about-copy p {
+  margin-top: 10px;
+  font-size: 14px;
+  line-height: 1.75;
+  color: #6d5560;
+}
+
+.about-links {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
 
 /* ---------- 棉球小猫 ---------- */
 .hero-cat {
@@ -823,6 +909,8 @@ a { color: inherit; }
 .lightbox-stage {
   display: grid;
   place-items: center;
+  align-content: center;
+  gap: 14px;
   min-height: 360px;
   padding: 32px;
   background: radial-gradient(circle, #ffd9e5 2px, transparent 2.4px) 0 0 / 20px 20px, #fff5f8;
@@ -830,9 +918,19 @@ a { color: inherit; }
 }
 
 .lightbox-stage img {
-  max-width: 100%;
-  max-height: 60vh;
+  width: min(200px, 60vw);
+  max-height: 52vh;
   object-fit: contain;
+  border: 3px solid var(--ink);
+  border-radius: 20px;
+  background: var(--cotton);
+  box-shadow: 0 4px 0 var(--pink-shadow);
+}
+
+.preview-note {
+  font-size: 12px;
+  color: #94798a;
+  letter-spacing: 0.02em;
 }
 
 .lightbox-info {
@@ -1031,6 +1129,7 @@ a { color: inherit; }
   .topbar { padding: 12px 16px; }
   .credits { gap: 2px 14px; }
   .hero { padding-top: 12px; }
+  .about-band { grid-template-columns: 1fr; padding: 20px; }
   .library { padding: 28px 12px 32px; }
   .drawer { position: static; border-radius: 22px; }
   .series-tab { width: 62px; font-size: 12px; }

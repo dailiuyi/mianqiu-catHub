@@ -94,7 +94,8 @@ def test_bot_emote_detail():
 def test_index_page():
     resp = client.get("/")
     assert resp.status_code == 200
-    assert "棉球小猫表情库" in resp.text
+    assert 'id="meme-grid"' in resp.text
+    assert "static/app.js" in resp.text
 
 
 def test_detail_page_renders_html():

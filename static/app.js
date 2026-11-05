@@ -3,7 +3,7 @@
  *
  * 特性：
  * 1. 多源 CDN 自动降级回退 (Local -> jsDelivr -> GitHub Raw)
- * 2. 触底无限加载 (分批 36 张)；贴纸进入视口后换成原图动图播放
+ * 2. 触底无限加载 (分批 36 张)，只加载 200px 静态首帧缩略图
  * 3. 拼音首字母/全拼/中文/韩文/标签/图中文字实时搜索
  * 4. 套系托盘、动静图与排序筛选
  * 5. 首屏小猫互动：看向指针、对悬停的表情做出同款心情、戳一下送一张表情、久不操作会睡着；
@@ -355,18 +355,7 @@
       : '再往下翻还有...';
   }
 
-  // 贴纸先显示静态缩略图（首帧），进入视口后预载原图动图，加载完再替换，避免闪白
-  const animateObserver = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (!entry.isIntersecting) return;
-      animateObserver.unobserve(entry.target);
-      const img = entry.target;
-      const preload = new Image();
-      preload.onload = () => { img.src = preload.src; };
-      preload.src = img.dataset.animated;
-    });
-  }, { rootMargin: '200px' });
-
+  // 列表只显示静态首帧缩略图，网页不加载原图与动图
   // 构造单张贴纸
   function createMemeCard(meme) {
     const card = document.createElement('button');
@@ -382,10 +371,6 @@
     img.loading = 'lazy';
     img.decoding = 'async';
     attachImageFallback(img, thumbRel);
-    if (meme.is_animated && meme.thumb_url) {
-      img.dataset.animated = resolveAssetUrl(meme.url);
-      animateObserver.observe(img);
-    }
     card.appendChild(img);
 
     card.addEventListener('click', () => openLightbox(meme));
@@ -459,9 +444,10 @@
     gift.className = 'gift';
     gift.setAttribute('aria-label', `打开小猫送的表情：${meme.title || ''}`);
     const img = document.createElement('img');
-    img.src = resolveAssetUrl(meme.url);
+    const thumbRel = meme.thumb_url || meme.url;
+    img.src = resolveAssetUrl(thumbRel);
     img.alt = '';
-    attachImageFallback(img, meme.url);
+    attachImageFallback(img, thumbRel);
     const words = document.createElement('span');
     words.textContent = CottonCat.phrase('poke');
     gift.append(img, words);
@@ -503,11 +489,11 @@
 
   // 打开大图弹窗（只做预览，不提供下载或复制）
   function openLightbox(meme) {
-    const rawUrl = resolveAssetUrl(meme.url);
+    const thumbRel = meme.thumb_url || meme.url;
 
-    lightboxImg.src = rawUrl;
+    lightboxImg.src = resolveAssetUrl(thumbRel);
     lightboxImg.alt = meme.title || '棉球小猫表情';
-    attachImageFallback(lightboxImg, meme.url);
+    attachImageFallback(lightboxImg, thumbRel);
 
     lightboxTitle.textContent = meme.title || '棉球小猫';
     lightboxTitleKo.textContent = meme.title_ko || '';
@@ -603,11 +589,11 @@
     const visitors = Number(data.visitors) || 0;
 
     if (api === 0 && visitors <= 1) {
-      lineEl.textContent = '页面刚开张，机器人还没被叫过。';
+      lineEl.textContent = '页面刚开张，接口还没被调用过。';
     } else if (api === 0) {
-      lineEl.innerHTML = `已经有 <b>${formatCount(visitors)}</b> 位朋友来过，机器人还没开张。`;
+      lineEl.innerHTML = `已经有 <b>${formatCount(visitors)}</b> 位朋友来过，接口还没被调用。`;
     } else {
-      lineEl.innerHTML = `小猫已经替机器人跑了 <b>${formatCount(api)}</b> 趟，` +
+      lineEl.innerHTML = `接口被调用 <b>${formatCount(api)}</b> 次，` +
         `页面被翻了 <b>${formatCount(views)}</b> 次，` +
         `<b>${formatCount(visitors)}</b> 位朋友来过。`;
     }

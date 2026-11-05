@@ -6,9 +6,9 @@
   <meta name="color-scheme" content="light">
   <meta name="theme-color" content="#ff9ccd">
   <link rel="icon" type="image/svg+xml" href="static/favicon.svg" id="favicon">
-  <title>棉球小猫表情库 (棉花小猫) | mianqiu-catHub</title>
+  <title>棉球小猫 · 粉丝整理站 | mianqiu-catHub</title>
   <link rel="preload" href="static/fonts/zcool-kuaile-subset.woff2?v=cat-expressions-2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="static/style.css?v=preview-only-1">
+  <link rel="stylesheet" href="static/style.css?v=fan-demo-1">
 </head>
 <body>
   <svg width="0" height="0" class="sr-only" aria-hidden="true">
@@ -23,23 +23,29 @@
 
   <!-- 顶部署名条 -->
   <header class="topbar">
-    <a class="wordmark" href="./" aria-label="棉球小猫表情库首页">
+    <a class="wordmark" href="./" aria-label="棉球小猫粉丝整理站首页">
       <svg class="wordmark-icon" aria-hidden="true"><use href="#cat-face"/></svg>
-      <span>棉球小猫表情库</span>
+      <span>棉球小猫 · 粉丝整理站</span>
     </a>
     <nav class="credits" aria-label="原作者与官方主页">
       <span>原作者 <b>쯔니 (zzni)</b></span>
-      <a href="https://e.kakao.com/creator/69020H" target="_blank" rel="noopener">Kakao 商店</a>
+      <a class="store-btn" href="https://e.kakao.com/creator/69020H" target="_blank" rel="noopener">官方商店 · 支持正版</a>
       <a href="https://www.instagram.com/zz_ni_e" target="_blank" rel="noopener">Instagram</a>
     </nav>
   </header>
 
   <!-- 首屏：会动的小猫 + 搜索 -->
   <section class="hero">
-    <h1 class="hero-title">今天发哪只棉球？</h1>
+    <h1 class="hero-title">棉球小猫 · 粉丝整理站</h1>
     <p class="hero-sub">
-      收录 <b id="hero-total">…</b> 张棉花小猫表情。戳一下小猫，它会挑一张送你。
+      原作者 <b>쯔니 (zzni)</b> 的 Kakao 表情包，这里收录 <b id="hero-total">…</b> 张。戳一下小猫，它会挑一张送你。
     </p>
+    <div class="hero-actions">
+      <a class="store-btn store-btn-lg" href="https://e.kakao.com/creator/69020H" target="_blank" rel="noopener">
+        去官方商店支持正版
+      </a>
+      <span class="hero-note">页面只做浏览：卡片与弹窗都是 200px 静态首帧预览</span>
+    </div>
 
     <div class="hero-cat" id="hero-cat"></div>
 
@@ -52,6 +58,25 @@
     </div>
 
     <div class="tag-cloud" id="tag-cloud" aria-label="快捷搜索"></div>
+  </section>
+
+  <!-- 粉丝站介绍 + 版权说明 -->
+  <section class="about-band" aria-label="关于原作者与使用边界">
+    <div class="about-copy">
+      <h2>关于 쯔니 (zzni)</h2>
+      <p>
+        「몽실몽실 냥냥이」系列的白猫表情：圆耳、粉腮、手绘线条。从第 1 弹一路画到第 10 弹，
+        另有迷你弹、跟踪猫、短毛猫与社区二创版本，都在这里的分类里。
+      </p>
+      <p>
+        本站是非官方、非商业的粉丝整理站，与原作者及 Kakao 无隶属或合作关系。素材权利归原作者与 Kakao 所有；
+        这里只展示 200px 静态首帧，不提供原图、动图、下载或打包，完整表情与使用授权请到官方商店获取。
+      </p>
+    </div>
+    <div class="about-links">
+      <a class="ghost-btn" href="https://www.instagram.com/zz_ni_e" target="_blank" rel="noopener">Instagram @zz_ni_e</a>
+      <a class="ghost-btn" href="static/disclaimer.html">版权与使用说明</a>
+    </div>
   </section>
 
   <main class="library" id="library">
@@ -95,6 +120,7 @@
     </button>
     <div class="lightbox-stage">
       <img id="lightbox-img" alt="">
+      <p class="preview-note">200px 静态首帧预览</p>
     </div>
     <div class="lightbox-info">
       <h2 id="lightbox-title"></h2>
@@ -116,12 +142,12 @@
         <span id="footer-stats-line"></span>
         <span class="footer-since" id="footer-since"></span>
       </p>
-      <p>非官方、非商业表情整理站，与原作者及 Kakao 无隶属或合作关系。原作署名 쯔니 (zzni)，素材权利归各自权利人所有。请支持正版。</p>
+      <p>非官方、非商业的粉丝整理站，与原作者及 Kakao 无隶属或合作关系。原作署名 쯔니 (zzni)，素材权利归各自权利人所有。页面仅提供 200px 静态首帧预览，请支持正版。</p>
       <p><a href="static/disclaimer.html">版权与使用免责声明 · 权利投诉</a></p>
     </div>
   </footer>
 
   <script src="static/cat.js?v=cat-expressions-2"></script>
-  <script src="static/app.js?v=preview-only-1"></script>
+  <script src="static/app.js?v=fan-demo-1"></script>
 </body>
 </html>
