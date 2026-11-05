@@ -8,7 +8,8 @@
  * 4. 套系托盘、动静图与排序筛选
  * 5. 首屏小猫互动：看向指针、对悬停的表情做出同款心情、戳一下送一张表情、久不操作会睡着；
  *    首屏滚出视口后由右下角的小猫伙伴接替
- * 6. 客户端 JSZip 6 并发限流打包下载；原图弹窗与一键剪贴板复制
+ *
+ * 站点只做预览：下载、复制图片/链接、批量打包和详情页入口都已移除，Bot 侧接口不受影响。
  */
 
 (function () {
@@ -38,11 +39,6 @@
   let searchQuery = '';
   let activeTag = '';
 
-  let isBatchMode = false;
-  let batchFormat = 'gif';
-  const selectedSet = new Set();
-  let currentLightboxMeme = null;
-
   const cardMeme = new WeakMap();
   let hoveredCard = null;
   let pokeTimes = [];
@@ -69,13 +65,6 @@
   const heroCatEl = $('hero-cat');
   const buddyEl = $('buddy');
 
-  const batchModeBtn = $('batch-mode-btn');
-  const batchTray = $('batch-tray');
-  const batchDownloadBtn = $('batch-download-btn');
-  const batchFormatBtns = document.querySelectorAll('#batch-format .seg-btn');
-  const batchSelectAllBtn = $('batch-select-all');
-  const selectedCountEl = $('selected-count');
-
   const lightbox = $('lightbox');
   const lightboxImg = $('lightbox-img');
   const lightboxTitle = $('lightbox-title');
@@ -83,11 +72,6 @@
   const lightboxSeries = $('lightbox-series');
   const lightboxFormat = $('lightbox-format');
   const lightboxTags = $('lightbox-tags');
-  const copyLinkBtn = $('copy-link-btn');
-  const copyImgBtn = $('copy-img-btn');
-  const downloadBtn = $('download-btn');
-  const downloadGifBtn = $('download-gif-btn');
-  const detailPageBtn = $('detail-page-btn');
 
   const toast = $('toast');
 
@@ -340,7 +324,6 @@
     } else {
       renderNextBatch();
     }
-    if (isBatchMode) syncBatchUi();
     syncUrlState();
   }
 
@@ -390,8 +373,6 @@
     card.type = 'button';
     card.className = 'sticker';
     card.title = meme.title || '';
-    if (selectedSet.has(meme.id)) card.classList.add('selected');
-    if (isBatchMode) card.setAttribute('aria-pressed', String(selectedSet.has(meme.id)));
     cardMeme.set(card, meme);
 
     const thumbRel = meme.thumb_url || meme.url;
@@ -407,13 +388,7 @@
     }
     card.appendChild(img);
 
-    card.addEventListener('click', () => {
-      if (isBatchMode) {
-        toggleSelectMeme(meme);
-      } else {
-        openLightbox(meme);
-      }
-    });
+    card.addEventListener('click', () => openLightbox(meme));
     return card;
   }
 
@@ -434,11 +409,6 @@
     if (relPath.startsWith('http://') || relPath.startsWith('https://')) return relPath;
     const base = CDN_FALLBACK_BASES[0];
     return base ? `${base.replace(/\/$/, '')}/${relPath.replace(/^\//, '')}` : relPath;
-  }
-
-  // GIF 版由 scripts/export_gif.py 预先生成，放在 images/gif/{id}.gif
-  function gifPath(meme) {
-    return `images/gif/${meme.id}.gif`;
   }
 
   // 无限滚动监听
@@ -531,9 +501,8 @@
     showToast.timer = setTimeout(() => toast.classList.remove('show'), 1800);
   }
 
-  // 打开大图弹窗
+  // 打开大图弹窗（只做预览，不提供下载或复制）
   function openLightbox(meme) {
-    currentLightboxMeme = meme;
     const rawUrl = resolveAssetUrl(meme.url);
 
     lightboxImg.src = rawUrl;
@@ -552,18 +521,10 @@
       lightboxTags.appendChild(sp);
     });
 
-    downloadBtn.href = rawUrl;
-    downloadBtn.setAttribute('download', `${meme.title || meme.id}.${meme.format || 'webp'}`);
-    const gifUrl = resolveAssetUrl(gifPath(meme));
-    downloadGifBtn.href = gifUrl;
-    downloadGifBtn.setAttribute('download', `${meme.title || meme.id}.gif`);
-    detailPageBtn.href = `/e/${meme.id}`;
-
     if (!lightbox.open) lightbox.showModal();
   }
 
   function onLightboxClosed() {
-    currentLightboxMeme = null;
     lightboxImg.removeAttribute('src');
   }
 
@@ -572,157 +533,6 @@
     dialog.addEventListener('click', (e) => {
       if (e.target === dialog) dialog.close();
     });
-  }
-
-  // 批量选择：卡片点选、全选当前筛选结果，都走这里同步界面
-  function syncBatchUi() {
-    const all = filteredMemes.length > 0 && filteredMemes.every(m => selectedSet.has(m.id));
-    selectedCountEl.textContent = selectedSet.size;
-    batchDownloadBtn.disabled = selectedSet.size === 0;
-    batchSelectAllBtn.textContent = all ? '取消全选' : '全选';
-    batchSelectAllBtn.setAttribute('aria-pressed', String(all));
-
-    memeGrid.querySelectorAll('.sticker').forEach(card => {
-      const meme = cardMeme.get(card);
-      const on = !!meme && selectedSet.has(meme.id);
-      card.classList.toggle('selected', on);
-      if (isBatchMode) card.setAttribute('aria-pressed', String(on));
-    });
-  }
-
-  function toggleSelectMeme(meme) {
-    const on = !selectedSet.has(meme.id);
-    if (on) selectedSet.add(meme.id);
-    else selectedSet.delete(meme.id);
-    syncBatchUi();
-    if (on) activeCat().flash('happy', 700);
-  }
-
-  // 全选当前筛选结果（不受已加载张数限制）
-  function toggleSelectAll() {
-    const all = filteredMemes.length > 0 && filteredMemes.every(m => selectedSet.has(m.id));
-    if (all) {
-      filteredMemes.forEach(m => selectedSet.delete(m.id));
-    } else {
-      filteredMemes.forEach(m => selectedSet.add(m.id));
-    }
-    syncBatchUi();
-    activeCat().flash(all ? 'sad' : 'love', 900);
-  }
-
-  function setBatchMode(on) {
-    isBatchMode = on;
-    batchModeBtn.textContent = on ? '退出批量' : '批量选择';
-    batchModeBtn.setAttribute('aria-pressed', String(on));
-    batchTray.hidden = !on;
-    memeGrid.classList.toggle('is-batch', on);
-    if (!on) selectedSet.clear();
-    applyFilters();
-  }
-
-  // JSZip 客户端并发限流下载。格式可选 GIF（通用）或原图 WebP；GIF 缺失时自动回退原图
-  async function downloadSelectedZip() {
-    if (selectedSet.size === 0) return;
-    if (typeof JSZip === 'undefined') {
-      showToast('打包组件还没加载好，请稍后再试');
-      return;
-    }
-
-    const wantGif = batchFormat === 'gif';
-    const zip = new JSZip();
-    const folder = zip.folder('mianqiu-cat-emotes');
-    const selectedMemes = allMemes.filter(m => selectedSet.has(m.id));
-
-    batchDownloadBtn.disabled = true;
-    batchDownloadBtn.textContent = '正在打包...';
-
-    const CONCURRENCY = 6;
-    let index = 0;
-    let done = 0;
-
-    async function fetchBlob(path) {
-      const resp = await fetch(resolveAssetUrl(path));
-      return resp.ok ? resp.blob() : null;
-    }
-
-    async function worker() {
-      while (index < selectedMemes.length) {
-        const item = selectedMemes[index++];
-        try {
-          let ext = item.format || 'webp';
-          let blob = wantGif ? await fetchBlob(gifPath(item)) : null;
-          if (blob) {
-            ext = 'gif';
-          } else {
-            blob = await fetchBlob(item.url);
-          }
-          if (blob) folder.file(`${item.title || item.id}.${ext}`, blob);
-        } catch (e) {
-          console.warn('下载单张表情包失败:', item.id, e);
-        }
-        done++;
-        batchDownloadBtn.textContent = `正在打包 ${done}/${selectedMemes.length}`;
-      }
-    }
-
-    await Promise.all(Array.from({ length: CONCURRENCY }, () => worker()));
-
-    batchDownloadBtn.textContent = '正在压缩...';
-    const content = await zip.generateAsync({ type: 'blob' });
-
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(content);
-    a.download = `棉球小猫表情包_${selectedMemes.length}张_${wantGif ? 'GIF' : '原图'}.zip`;
-    a.click();
-    URL.revokeObjectURL(a.href);
-
-    batchDownloadBtn.disabled = false;
-    batchDownloadBtn.textContent = '打包下载';
-    showToast(`已打包 ${selectedMemes.length} 张（${wantGif ? 'GIF' : '原图'}）`);
-    activeCat().flash('love', 1600);
-  }
-
-  // 剪贴板复制图片链接
-  async function copyImageLink() {
-    if (!currentLightboxMeme) return;
-    const absUrl = new URL(resolveAssetUrl(currentLightboxMeme.url), window.location.href).href;
-    try {
-      await navigator.clipboard.writeText(absUrl);
-      showToast('已复制链接');
-    } catch (e) {
-      window.prompt('浏览器不允许自动复制，请手动复制链接：', absUrl);
-    }
-  }
-
-  // 剪贴板复制图片（转为 PNG Blob 写入 ClipboardItem）
-  async function copyImageBlob() {
-    if (!currentLightboxMeme) return;
-    if (!navigator.clipboard || !window.ClipboardItem) {
-      showToast('当前浏览器不支持复制图片，请用下载原图');
-      return;
-    }
-    try {
-      const resp = await fetch(resolveAssetUrl(currentLightboxMeme.url));
-      const blob = await resp.blob();
-
-      // 大多数系统剪贴板只接受 image/png
-      const img = new Image();
-      img.src = URL.createObjectURL(blob);
-      await img.decode();
-
-      const canvas = document.createElement('canvas');
-      canvas.width = img.naturalWidth;
-      canvas.height = img.naturalHeight;
-      canvas.getContext('2d').drawImage(img, 0, 0);
-      URL.revokeObjectURL(img.src);
-
-      const pngBlob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
-      await navigator.clipboard.write([new ClipboardItem({ 'image/png': pngBlob })]);
-      showToast('已复制图片（动图会变成静止的第一帧）');
-    } catch (e) {
-      console.error(e);
-      showToast('复制图片失败，请用下载原图');
-    }
   }
 
   function bindSegmented(buttons, onPick) {
@@ -823,18 +633,10 @@
 
     bindSegmented(typeFilterBtns, btn => { activeType = btn.dataset.type; });
     bindSegmented(sortFilterBtns, btn => { activeSort = btn.dataset.sort; });
-    bindSegmented(batchFormatBtns, btn => { batchFormat = btn.dataset.format; });
-
-    batchModeBtn.addEventListener('click', () => setBatchMode(!isBatchMode));
-    batchDownloadBtn.addEventListener('click', downloadSelectedZip);
 
     $('lightbox-close').addEventListener('click', () => lightbox.close());
     lightbox.addEventListener('close', onLightboxClosed);
     closeOnBackdrop(lightbox);
-    copyLinkBtn.addEventListener('click', copyImageLink);
-    copyImgBtn.addEventListener('click', copyImageBlob);
-
-    batchSelectAllBtn.addEventListener('click', toggleSelectAll);
 
     // 小猫互动
     heroCat.hit.addEventListener('click', () => pokeCat(heroCat));

@@ -40,7 +40,7 @@
   - **拒绝全量卡顿**：采用视口监听（IntersectionObserver）与触底无限加载，解决 Phoebe-Hub 一次性渲染 1000+ DOM 节点卡死的问题。
   - **多源 CDN 回退**：支持自定义域名 / GitHub Pages / jsDelivr CDN / GitHub Raw 三级智能降级加载。
   - **多维实时检索**：支持中文汉字、拼音首字母/全拼、韩文原名、OCR 识别文字及分类标签过滤。
-  - **浏览器端并发批量打包**：集成 JSZip 客户端并发限流打包下载，不消耗服务器算力。
+  - **只做预览**：网页不提供下载、复制图片/链接、批量打包或详情页入口按钮；素材仍由 Bot 接口按需取用。
 - **极度稳定的第三方 QQ Bot 只读 HTTP 接口**：
   - 版本化约定（`/api/v1/bot/...`），数据结构向后兼容，字段只增不减。
   - 同时生成全量静态 JSON 快照（`data/memes.json`），即便不运行后端服务，Bot 亦可直接通过静态 CDN 读取调用。
@@ -79,7 +79,7 @@
 - **网页搜索**：`https://mianhuacat.elma-gohan.xyz/?q=早八` — 在浏览器里直接看结果，`series`、`tag` 也可以写进地址。
 
 ### 3. 单个表情详情
-- **网页**：`https://mianhuacat.elma-gohan.xyz/e/kakao-01-01` — 大图、套系、标签与下载按钮都在这一页，可直接分享。
+- **网页**：`https://mianhuacat.elma-gohan.xyz/e/kakao-01-01` — 大图、套系与标签都在这一页，只做预览，不提供下载按钮。
 - **接口**：`https://mianhuacat.elma-gohan.xyz/api/v1/bot/emotes/kakao-01-01` — 返回单条表情的完整元数据，字段同随机接口的 `data`；id 不存在时返回 HTTP 404 与 `{"detail":"Emote not found"}`，没有 `code` 信封。
 
 ### 4. 所有可用标签与计数
@@ -115,12 +115,12 @@ mianqiu-catHub/
 ├── images/
 │   ├── raw/                # 原始动图/静图文件 (动图基本都是 Animated WebP)
 │   ├── thumbs/             # 200px 极速 WebP 缩略图（静态首帧）
-│   └── gif/                # 由 scripts/export_gif.py 预生成的 GIF 版，供下载
+│   └── gif/                # 由 scripts/export_gif.py 预生成的 GIF 版，供 Bot 与客户端发送
 ├── scripts/
 │   ├── fetch_kakao.py      # Kakao 官方全套表情抓取与解析器
 │   ├── import_local.py     # 本地文件/QQ 表情缓存导入清洗器
 │   ├── fetch_url.py        # 单张/批量 URL (含小红书等) 抓取器
-│   ├── export_gif.py       # 动图转 GIF（供下载，保留透明与时长）
+│   ├── export_gif.py       # 动图转 GIF（供 Bot 发送，保留透明与时长）
 │   ├── build_index.py      # 扫描生成 memes.json、缩略图与 dHash 去重
 │   └── image_utils.py      # 格式转换、200px WebP 缩略图生成与感知哈希
 ├── server/
@@ -128,7 +128,7 @@ mianqiu-catHub/
 │   └── routes/             # 接口路由实现
 ├── static/
 │   ├── index.html          # 前端展示单页（根目录 index.html 是它的副本，供 Cloudflare Pages 使用，两者需同步）
-│   ├── app.js              # 无限加载、动图按需播放、拼音搜索、套系托盘、小猫互动、CDN 回退与 JSZip 打包
+│   ├── app.js              # 无限加载、动图按需播放、拼音搜索、套系托盘、小猫互动与 CDN 回退（只做预览）
 │   ├── cat.js              # 参考图轮廓 SVG 小猫，17 种心情与随机 favicon
 │   ├── style.css           # 固定亮粉贴纸主题，含小屏与减少动态效果适配
 │   └── fonts/              # ZCOOL 快乐体子集 woff2（OFL 授权，见 ZCOOLKuaiLe-OFL.txt）
@@ -222,7 +222,7 @@ journalctl --user -u mianqiu-cathub-local.service -n 50 --no-pager
    git push origin main
    ```
    SSH 私钥和统计数据只留在本机/服务器，不进入仓库；GitHub 已有同名公开仓库，无需重复创建。
-4. 脚本打印 `DEPLOYED rel-...` 仅表示后端本机健康检查与 nginx 配置检查通过。还需用真实浏览器检查小猫表情、搜索、图片/动图、下载及页脚统计；生产验收会产生真实访问量。
+4. 脚本打印 `DEPLOYED rel-...` 仅表示后端本机健康检查与 nginx 配置检查通过。还需用真实浏览器检查小猫表情、搜索、图片/动图、大图预览及页脚统计；生产验收会产生真实访问量。
 5. 手动回滚：先用 `readlink -f /opt/mianqiu-cathub/current` 记录当前版本，确认要恢复的 release 仍在，然后在服务器执行 `ln -sfn /opt/mianqiu-cathub/releases/<旧版本> /opt/mianqiu-cathub/current`、`systemctl restart mianqiu-cathub`，再验本机和公网接口。统计文件不回退。脚本的自动回滚仅覆盖后端健康检查失败；nginx 检查失败会移除本站配置并退出，需从同目录的 `.bak-rel-*` 恢复配置，通过 `nginx -t` 后再 reload，不能视为整站自动回滚。
 
 ### 发布前检查与本地验收
@@ -238,6 +238,14 @@ bash -n deploy/deploy.sh
 ```
 
 2026-11-01 表情扩充版本：上述检查通过，现有测试 21 项通过；另有一条 Starlette TestClient/httpx 弃用警告，不影响本次测试结果。索引的 569 个 ID 无重复，原图、缩略图和 GIF 均可在仓库找到。浏览器已验证情绪关键词、卡片悬停、无结果状态、戳猫送图、390px 小屏及减少动态效果；这些是实际交互检查，不代表自动化测试覆盖全部前端。视觉相似度仍由用户验收。
+
+### 2026-11-05 关闭网页下载与复制入口（仅前端，本地未部署）
+
+- 需求：关闭网页上的下载、复制、批量打包等可传播入口，只保留基础预览；Bot 仍调用 `/api/v1/bot/*`，接口与 `/e/{id}` 详情页均保持不变。
+- 改动：`static/index.html` 与根目录副本 `index.html` 删除 JSZip 脚本、批量选择按钮、批量托盘，以及大图弹窗的「网页详情」「复制图片」「复制链接」「下载 GIF」「下载原图」五个按钮；`static/app.js` 删除批量选择、JSZip 打包、剪贴板复制、下载链接与详情入口逻辑；`static/style.css` 删除随之失去引用的 `.chunky-btn`、`.batch-tray`、`.is-batch`、`.lightbox-actions`、`.detail-actions` 规则；`server/app.py` 的详情页模板去掉两个下载按钮，并把页脚「可下载不代表获得使用授权」改为「公开可访问不代表获得使用授权」。
+- 未改：图片与 GIF 文件、`data/memes.json`、全部 Bot 接口、nginx 放行规则。前端不再提供入口，但 `images/`、`/e/{id}` 仍是公开可访问资源。
+- 本地验证：`python -m pytest -q` 25 项通过，`node --check static/app.js` 通过，`cmp index.html static/index.html` 一致；本地 8123 端口真实浏览器确认首页无批量按钮、大图弹窗只剩关闭按钮、`/e/kakao-01-01` 无下载按钮、`/api/v1/bot/random` 正常返回。
+- 尚未部署到 `elma-gohan.xyz`，生产页面仍是旧版；部署须另行授权。
 
 ### 2026-11-02 首页接入说明与版权声明发布
 
@@ -295,7 +303,7 @@ bash -n deploy/deploy.sh
   - 首屏小猫滚出视口后，右下角会探出一只小猫伙伴接替上面这些互动。
   - 表情验收：搜索「大哭」「干饭」「墨镜」「头疼」「发愁」分别触发大哭、馋嘴、得意、晕乎、紧张；搜索「加班」后悬停该表情可查看无情绪文字时的大笑选择。「笑哭」优先匹配大笑，「大哭」优先于普通委屈，「哼哼」优先于生气。无搜索结果仍显示委屈，不伪造匹配结果。
 - 动图播放：缩略图（`images/thumbs/`）是静态首帧。贴纸进入视口后，前端在后台预载 `images/raw/` 里的原图动图，加载完再替换，避免闪白。全部 569 张原图共 100 MB。滚到哪里才加载到哪里。
-- 下载格式：源图以 Animated WebP 为主，QQ、微信等客户端对 WebP 表情支持不稳定，所以用 `scripts/export_gif.py` 预先把全部表情转成 GIF 放在 `images/gif/`（569 个，共 69 MB）。大图弹窗有「下载 GIF」和「下载原图」两个按钮；批量托盘可选 GIF 或原图，打包用 JSZip 在前端完成，GIF 缺失时自动回退原图。
+- GIF 素材（2026-11-05 起网页不再提供下载）：源图以 Animated WebP 为主，QQ、微信等客户端对 WebP 表情支持不稳定，所以用 `scripts/export_gif.py` 预先把全部表情转成 GIF 放在 `images/gif/`（569 个，共 69 MB），供 Bot 与客户端取用。网页侧只做预览：大图弹窗、批量托盘、JSZip 打包、复制图片/链接和「网页详情」入口已全部移除；`/api/v1/bot/*` 接口和 `/e/{id}` 详情页不变。
   - 转换要点：逐帧时长从 WebP 的 ANMF 块直接读（Pillow 解码前读不到 `duration`）；GIF 延迟只能按 10ms 存，按累计时间补偿取整，否则每帧 119ms、149ms 会被截成 110ms、140ms，几十帧累积成几百毫秒；透明色用调色板保留索引 255，帧间用 `disposal=2`。
   - 新增表情后重跑：`python -m scripts.export_gif`（默认只补缺失的，`--force` 全部重建）。
 - 标题字体：ZCOOL 快乐体（Google Fonts，OFL）。当前子集含 724 个字符，woff2 约 71 KiB，覆盖本轮页面、脚本、表情标题和 OCR 文本中原字体支持的字符；原字体不含的韩文、emoji 等由系统字体显示。本轮表情新增台词后已重建子集，并为字体 URL 添加 `cat-expressions-1` 缓存版本。**新增带新汉字的文案、台词或表情标题后，需要重新生成子集**，否则缺字会回落到系统字体：

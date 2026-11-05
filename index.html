@@ -8,9 +8,7 @@
   <link rel="icon" type="image/svg+xml" href="static/favicon.svg" id="favicon">
   <title>棉球小猫表情库 (棉花小猫) | mianqiu-catHub</title>
   <link rel="preload" href="static/fonts/zcool-kuaile-subset.woff2?v=cat-expressions-2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="static/style.css?v=home-legal-1">
-  <!-- 引入 JSZip 用于客户端无服务器并发打包下载 -->
-  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js" defer></script>
+  <link rel="stylesheet" href="static/style.css?v=preview-only-1">
 </head>
 <body>
   <svg width="0" height="0" class="sr-only" aria-hidden="true">
@@ -71,7 +69,6 @@
           <button type="button" class="seg-btn" data-sort="random" aria-pressed="false">随机</button>
           <button type="button" class="seg-btn" data-sort="title" aria-pressed="false">按名称</button>
         </div>
-        <button type="button" id="batch-mode-btn" class="chunky-btn" aria-pressed="false">批量选择</button>
       </div>
     </div>
 
@@ -91,17 +88,6 @@
   <!-- 小猫伙伴：首屏小猫滚出视口后跟到右下角，对鼠标停留的表情做反应 -->
   <div class="buddy" id="buddy"></div>
 
-  <!-- 批量下载托盘 -->
-  <div class="batch-tray" id="batch-tray" hidden>
-    <span>已选 <b id="selected-count">0</b> 张</span>
-    <div class="segmented" id="batch-format" role="group" aria-label="打包格式">
-      <button type="button" class="seg-btn active" data-format="gif" aria-pressed="true">GIF</button>
-      <button type="button" class="seg-btn" data-format="raw" aria-pressed="false">原图</button>
-    </div>
-    <button type="button" id="batch-select-all" class="chunky-btn" aria-pressed="false">全选</button>
-    <button type="button" id="batch-download-btn" class="chunky-btn chunky-btn-primary" disabled>打包下载</button>
-  </div>
-
   <!-- 大图弹窗 -->
   <dialog id="lightbox" class="sheet lightbox" aria-labelledby="lightbox-title">
     <button type="button" class="sheet-close" id="lightbox-close" aria-label="关闭">
@@ -118,13 +104,6 @@
         <dt>尺寸</dt><dd id="lightbox-format"></dd>
       </dl>
       <div id="lightbox-tags" class="tag-list"></div>
-      <div class="lightbox-actions">
-        <a id="detail-page-btn" class="chunky-btn">网页详情</a>
-        <button type="button" id="copy-img-btn" class="chunky-btn">复制图片</button>
-        <button type="button" id="copy-link-btn" class="chunky-btn">复制链接</button>
-        <a id="download-gif-btn" class="chunky-btn chunky-btn-primary" download>下载 GIF</a>
-        <a id="download-btn" class="chunky-btn" download>下载原图</a>
-      </div>
     </div>
   </dialog>
 
@@ -143,6 +122,6 @@
   </footer>
 
   <script src="static/cat.js?v=cat-expressions-2"></script>
-  <script src="static/app.js?v=stats-fix-1"></script>
+  <script src="static/app.js?v=preview-only-1"></script>
 </body>
 </html>

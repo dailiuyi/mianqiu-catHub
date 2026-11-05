@@ -288,7 +288,7 @@ DETAIL_PAGE = """<!DOCTYPE html>
 <main class="detail">
 {body}
 </main>
-<footer class="detail-foot"><p>非官方、非商业表情整理站。原作署名 쯔니 (zzni)，素材权利归各自权利人所有；可下载不代表获得使用授权。<a href="/static/disclaimer.html">版权声明与权利投诉</a></p></footer>
+<footer class="detail-foot"><p>非官方、非商业表情整理站。原作署名 쯔니 (zzni)，素材权利归各自权利人所有；公开可访问不代表获得使用授权。<a href="/static/disclaimer.html">版权声明与权利投诉</a></p></footer>
 </body>
 </html>"""
 
@@ -305,7 +305,6 @@ def render_detail_page(item: Optional[Dict[str, Any]], emote_id: str = "") -> st
         return DETAIL_PAGE.format(page_title="没有这只棉球", body=body)
 
     title = escape(item.get("title") or "棉球小猫")
-    meta_id = escape(item.get("id") or "", quote=True)
     raw_url = escape("/" + (item.get("url") or "").lstrip("/"), quote=True)
     fmt = (item.get("format") or "webp").lower()
     width = item.get("width") or 0
@@ -328,10 +327,6 @@ def render_detail_page(item: Optional[Dict[str, Any]], emote_id: str = "") -> st
     {ocr_html}
   </dl>
   <div class="tag-list">{tag_html}</div>
-  <div class="detail-actions">
-    <a class="chunky-btn chunky-btn-primary" href="/images/gif/{meta_id}.gif" download="{title}.gif">下载 GIF</a>
-    <a class="chunky-btn" href="{raw_url}" download="{title}.{escape(fmt, quote=True)}">下载原图</a>
-  </div>
 </section>"""
     return DETAIL_PAGE.format(page_title=title, body=body)
 
