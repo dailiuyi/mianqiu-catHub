@@ -239,13 +239,14 @@ bash -n deploy/deploy.sh
 
 2026-11-01 表情扩充版本：上述检查通过，现有测试 21 项通过；另有一条 Starlette TestClient/httpx 弃用警告，不影响本次测试结果。索引的 569 个 ID 无重复，原图、缩略图和 GIF 均可在仓库找到。浏览器已验证情绪关键词、卡片悬停、无结果状态、戳猫送图、390px 小屏及减少动态效果；这些是实际交互检查，不代表自动化测试覆盖全部前端。视觉相似度仍由用户验收。
 
-### 2026-11-05 关闭网页下载与复制入口（仅前端，本地未部署）
+### 2026-11-05 关闭网页下载与复制入口（仅前端，已发布）
 
 - 需求：关闭网页上的下载、复制、批量打包等可传播入口，只保留基础预览；Bot 仍调用 `/api/v1/bot/*`，接口与 `/e/{id}` 详情页均保持不变。
 - 改动：`static/index.html` 与根目录副本 `index.html` 删除 JSZip 脚本、批量选择按钮、批量托盘，以及大图弹窗的「网页详情」「复制图片」「复制链接」「下载 GIF」「下载原图」五个按钮；`static/app.js` 删除批量选择、JSZip 打包、剪贴板复制、下载链接与详情入口逻辑；`static/style.css` 删除随之失去引用的 `.chunky-btn`、`.batch-tray`、`.is-batch`、`.lightbox-actions`、`.detail-actions` 规则；`server/app.py` 的详情页模板去掉两个下载按钮，并把页脚「可下载不代表获得使用授权」改为「公开可访问不代表获得使用授权」。
 - 未改：图片与 GIF 文件、`data/memes.json`、全部 Bot 接口、nginx 放行规则。前端不再提供入口，但 `images/`、`/e/{id}` 仍是公开可访问资源。
 - 本地验证：`python -m pytest -q` 25 项通过，`node --check static/app.js` 通过，`cmp index.html static/index.html` 一致；本地 8123 端口真实浏览器确认首页无批量按钮、大图弹窗只剩关闭按钮、`/e/kakao-01-01` 无下载按钮、`/api/v1/bot/random` 正常返回。
-- 尚未部署到 `elma-gohan.xyz`，生产页面仍是旧版；部署须另行授权。
+- 提交 `bafe796` 落在 `dev` 分支并推送到 `origin/dev`（新建分支，未合并 `main`）。经用户授权，`deploy/deploy.sh` 发布生产版本 `rel-20261105T085702Z`，`current` 指向该目录，`mianqiu-cathub` 服务 active，上一版本 `rel-20261105T061828Z` 保留用于回滚。
+- 公网验证：`/`、`/static/app.js`、`/e/kakao-01-01`、`/api/v1/bot/summary` 均 200；部署文件 SHA-256 与本地一致（`static/index.html` `be1a804…`、`static/app.js` `2c70e02…`、`static/style.css` `c9c986c…`、`server/app.py` `0120539…`）。真实浏览器确认首页 36 张贴纸、无批量按钮与 JSZip、弹窗只剩关闭按钮；`/api/v1/bot/random` 返回 `code:0` 与完整 `data`。
 
 ### 2026-11-02 首页接入说明与版权声明发布
 
