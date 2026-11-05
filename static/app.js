@@ -768,6 +768,7 @@
     const sinceEl = $('footer-since');
     if (!box || !lineEl || !sinceEl) return;
 
+    // 浏览量上报失败（如被拦截）不影响统计显示
     try {
       await fetch('/api/stats/view', {
         method: 'POST',
@@ -775,9 +776,7 @@
         body: JSON.stringify({ visitor: getVisitorId() }),
         keepalive: true
       });
-    } catch (e) {
-      return; // 浏览量记不上就整行不显示，别把失败当成没人来
-    }
+    } catch (e) { /* 只影响本次计数 */ }
 
     let data;
     try {
